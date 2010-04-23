@@ -31,12 +31,11 @@ static int ex_sock_recv(SOCKET sock, char *buf, size_t bufsize)
 	return ret;
 }
 
-int ex_sock_nread(SOCKET sock, char *buf, size_t bufsize, size_t n)
+int ex_sock_nread(SOCKET sock, char *buf, size_t n)
 {
 	size_t nRead = 0;
 	size_t nLeft = n;
 	int ret;
-	assert(bufsize >= n);
 	while (nLeft > 0) {
 		ret = ex_sock_recv(sock, buf + nRead,
 		                   MIN(nLeft, EX_TCP_QUAN));
@@ -136,7 +135,7 @@ int ex_load_body(ExHttp *pHttp)
 			}
 			ret = ex_sock_nread(pHttp->sock,
 			                    pHttp->postData + sLen,
-					    cLen - sLen, cLen - sLen);
+					    cLen - sLen);
 			if (cLen - sLen == ret) {
 				ret = 2;
 			}
