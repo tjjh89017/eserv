@@ -27,7 +27,8 @@ int cgi_handler(ExHttp *pHttp, void *handle)
 int errorLog(ExHttp *pHttp, const char *mess)
 {
 	assert(pHttp);
-	printf("%s\n", mess);
+	if (pHttp)
+		printf("%s\n", mess);
 	return 0;
 }
 
