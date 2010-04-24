@@ -30,7 +30,7 @@ extern "C" {
 #define	closesocket(a)		close(a)
 #define	ERRNO			errno
 #define	INVALID_SOCKET		(-1)
-typedef int SOCKET;
+typedef long SOCKET;
 
 #define  EX_SOCK_ERRNO errno
 #define	 EX_EINTR EINTR
