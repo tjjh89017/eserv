@@ -154,7 +154,7 @@ static int cgiProcess(ExHttp *pHttp)
 			break;
 		}
 		if (decodeParam(pHttp) < 0) {
-			errorLog(pHttp , "param decode error");
+			errorLog(pHttp, "param decode error");
 			ret = -3;
 			break;
 		}
@@ -239,7 +239,7 @@ void requestHandler(void *s)
 		if (parseHeader(&httpInfo) < 0) {
 			ex_error_reply(&httpInfo, 400);
 				/* bad Request */
-			errorLog(&httpInfo , "parse head error");
+			errorLog(&httpInfo, "parse head error");
 			clearHttp(&httpInfo);
 			break;
 		}
