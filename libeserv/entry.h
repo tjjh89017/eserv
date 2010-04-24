@@ -19,6 +19,7 @@ extern "C" {
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <stdint.h>
 
 #include <pwd.h>
 #include <unistd.h>
@@ -30,7 +31,12 @@ extern "C" {
 #define	closesocket(a)		close(a)
 #define	ERRNO			errno
 #define	INVALID_SOCKET		(-1)
+
+# if __WORDSIZE == 64
 typedef long SOCKET;
+#else
+typedef int SOCKET;
+#endif
 
 #define  EX_SOCK_ERRNO errno
 #define	 EX_EINTR EINTR
