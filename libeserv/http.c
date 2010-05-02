@@ -88,7 +88,7 @@ static int ex_http_start()
 		while (1) {
 			if (ExContext.threadCnt < EX_MAX_THREADS) {
 				start_thread((void *) requestHandler,
-				             (void *) cli_fd);
+				             (void *) &cli_fd);
 				break;
 			} else
 				ex_sleep(50);

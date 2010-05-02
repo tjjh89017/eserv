@@ -2,8 +2,12 @@ PROG = eserv
 
 CC = gcc
 
+ifeq ($(shell uname),linux)
+SOURCE_FLAGS = -D_POSIX_SOURCE -D_BSD_SOURCE
+endif
+
 CFLAGS = -Os -Wall -Wextra -Werror \
-	 -D_POSIX_SOURCE -D_BSD_SOURCE -g \
+	 $(SOURCE_FLAGS) -g \
 	 -std=gnu99
 # -D NDEBUG
 LDFLAGS = -lpthread

@@ -32,6 +32,10 @@ extern "C" {
 #define	ERRNO			errno
 #define	INVALID_SOCKET		(-1)
 
+#ifdef __FREEBSD__
+#  define __WORDSIZE WORD_BIT
+#endif
+
 # if __WORDSIZE == 64
 typedef long SOCKET;
 #else

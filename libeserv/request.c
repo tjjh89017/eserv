@@ -201,7 +201,7 @@ static int replyHandler(ExHttp *pHttp)
 
 void requestHandler(void *s)
 {
-	SOCKET sock = (SOCKET)s;
+	SOCKET sock = *((SOCKET*)s);
 	char recvBuf[MAX_HEADER_SIZE + 8];
 
 	char pool[512];
