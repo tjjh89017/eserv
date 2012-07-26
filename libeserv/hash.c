@@ -29,7 +29,7 @@ void ex_hash_clear(ex_hashmap *hm)
 	size_t i;
 
 	do {
-		if (hm->mpool->cflag == 0)
+		if (hm->mpool == NULL || hm->mpool->cflag == 0)
 			break;
 		for (i = 0 ; i < hm->size ; ++i) {
 			cl = hm->buckets[i];
