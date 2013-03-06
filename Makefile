@@ -10,6 +10,7 @@ CFLAGS = -Os -Wall -Wextra -Werror \
 	 $(SOURCE_FLAGS) -g \
 	 -std=gnu99
 # -D NDEBUG
+
 LDFLAGS = -lpthread
 
 OBJS = \
@@ -29,7 +30,7 @@ OBJS = \
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(CC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(OBJS)
+	$(CC) -o $(PROG) $(CFLAGS) $(OBJS) $(LDFLAGS)
 
 clean:
 	rm -f $(PROG) $(OBJS)
