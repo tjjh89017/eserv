@@ -15,8 +15,8 @@ void ex_hash_init(ex_hashmap *hm, ex_mpool *mp, size_t _size)
 	hm->mpool = mp;
 	hm->buckets = (ex_hashlist **)
 		ex_mpool_malloc(mp,
-		                sizeof(int) * _size);
-	memset(hm->buckets, 0, sizeof(int) * _size);
+		                sizeof(long) * _size);
+	memset(hm->buckets, 0, sizeof(long) * _size);
 	hm->size = _size;
 
 	hm->hashcmp = (void *) ex_hashcmp_str;
