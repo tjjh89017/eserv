@@ -1,13 +1,27 @@
-Project: eServ
+eServ: Embedded Web server toolkit written in pure C
 
-namespace: ex
+Features
+--------
+  * Built-in HTTP daemon along with dynamic content management
+  * Multi-threaded HTTP daemon and CGI execution
+  * Support POSIX environments
 
-Configurations:
-  - file: libeserv/http.h
-  - default listen port
+Licensing
+---------
+  MIT License.  lease check the file LICENSE for details.
+
+
+Programming Note
+----------------
+  * namespace: ex
+
+Configurations
+--------------
+  * file: libeserv/http.h
+  * default listen port
     #define  PORT 8000
-  - default max threads
+  * default max threads
     #define EX_MAX_THREADS 10
-  - directory www
+  * directory www
     static const char *IndexFile = "index.html";
     static const char *RootPath = "www";
