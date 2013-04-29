@@ -12,7 +12,7 @@ extern "C" {
 #define RootPath 	"www"
 #define CgiExt		".cgi"
 
-/* for cache usage, default is ony-day. */
+/* for cache usage, default is one-day. */
 #define ExpireTime 	(24 * 60 * 60)
 
 #define SERVER "eServ/1.1"
