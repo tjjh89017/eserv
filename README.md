@@ -9,7 +9,9 @@ Features
 Licensing
 ---------
   MIT License.  lease check the file LICENSE for details.
-
+  The demo CGI programs utilizes jQuery, which is copyrighted by
+  jQuery Foundation and other contributors.  Both eserv and jQuery
+  are released under MIT License.
 
 Programming Note
 ----------------
