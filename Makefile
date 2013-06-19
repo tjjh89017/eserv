@@ -11,6 +11,8 @@ CFLAGS = -Os -Wall -Wextra -Werror \
 	 -std=gnu99
 # -D NDEBUG
 
+CFLAGS += -m32
+
 LDFLAGS = -lpthread
 
 OBJS = \
