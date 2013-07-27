@@ -1,6 +1,7 @@
 #include "entry.h"
 #include "misc.h"
 
+
 int start_thread(void *(*func)(void *), void *param)
 {
 	pthread_t thread_id;
