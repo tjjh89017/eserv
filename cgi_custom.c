@@ -1,4 +1,4 @@
-#include "libeserv/cgi.h"
+#include "eserv/cgi.h"
 
 int cgi_page_sum(ExHttp *pHttp)
 {

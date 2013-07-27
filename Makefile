@@ -8,31 +8,24 @@ endif
 
 CFLAGS = -Os -Wall -Wextra -Werror \
 	 $(SOURCE_FLAGS) -g \
-	 -std=gnu99
+	 -std=gnu99 \
+	 -Iinclude
 # -D NDEBUG
 
 CFLAGS += -m32
+LIBS = -Llib/eserv
+LDFLAGS = -lpthread -leserv
 
-LDFLAGS = -lpthread
-
-OBJS = \
-	libeserv/mempool.o \
-	libeserv/hash.o \
-	libeserv/io.o \
-	libeserv/http.o \
-	libeserv/request.o \
-	libeserv/analysis.o \
-	libeserv/entry.o \
-	libeserv/cgi.o \
-	libeserv/misc.o \
-	main.o \
-	\
+OBJS = main.o \
 	cgi_custom.o
+
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
 
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(CC) -o $(PROG) $(CFLAGS) $(OBJS) $(LDFLAGS)
+	$(CC) -o $(PROG) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
 
 clean:
 	rm -f $(PROG) $(OBJS)
