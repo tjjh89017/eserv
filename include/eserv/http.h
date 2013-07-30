@@ -86,6 +86,8 @@ int ex_send_msg(ExHttp *pHttp, const char *type, const char *buf, size_t len);
 int ex_send_file(ExHttp *pHttp, const char *filePath);
 int ex_error_reply(const ExHttp *pHttp, int stscode);
 
+int ex_send_msg_session(ExHttp *pHttp, const char *type, const char *buf, size_t len, const char *session_id);
+
 #ifdef __cplusplus
 }
 #endif

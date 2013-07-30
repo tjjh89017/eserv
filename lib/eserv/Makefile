@@ -5,15 +5,15 @@ PROG = libeserv.a
 ifeq ($(shell uname),linux)
 SOURCE_FLAGS = -D_POSIX_SOURCE -D_BSD_SOURCE
 endif
-
-CFLAGS = -Os -Wall -Wextra -Werror \
+#-Werror
+CFLAGS = -Os -Wall -Wextra \
 	$(SOURCE_FLAGS) -g \
 	-std=gnu99 \
 	-I../../include/eserv
 
 CFLAGS += -m32
 
-LDFLAGS = -lpthread
+LDFLAGS = -lpthread -lcrypt
 
 OBJS = \
     mempool.o \
@@ -24,7 +24,8 @@ OBJS = \
 	analysis.o \
 	entry.o \
 	cgi.o \
-	misc.o
+	misc.o \
+	session.o
 
 .c.o:
 	$(CC) $(CFLAGS)  -c $*.c

@@ -1,4 +1,5 @@
 #include "eserv/cgi.h"
+#include "eserv/session.h"
 
 int cgi_page_sum(ExHttp *pHttp)
 {
@@ -26,25 +27,40 @@ int cgi_page_txt(ExHttp *pHttp)
 	return 0;
 }
 
+// session test
+
 int cgi_page_login(ExHttp *pHttp)
 {
 	const char *smsg = "login success";
 	const char *emsg = "login error";
-	static const char *user = "eserv";
-	static const char *passwd = "passwd";
+	const char *gss = "get session success";
+	const char *ss = "send session";
+	//static const char *user = "eserv";
+	//static const char *passwd = "passwd";
 
 	const char *pRet = emsg;
 
-	const char *pUser , *pPasswd;
+	const char *pUser , *pPasswd, *pSession;
 	printf("\n--login.cgi--\n");
 	print_param(pHttp);
 
+	pSession = sessionFromHeader(get_head_info(pHttp, "Cookie"));
 	pUser = get_param_info(pHttp, "user");
 	pPasswd = get_param_info(pHttp, "passwd");
+	/*
 	if (strcmp(user, pUser) == 0 && strcmp(passwd, pPasswd) == 0) {
 		pRet = smsg;
 	}
-	ex_send_msg(pHttp, NULL, pRet, strlen(pRet));
+	*/
+	//ex_send_msg(pHttp, NULL, pRet, strlen(pRet));
+	if(pSession != NULL){
+		ex_send_msg(pHttp, NULL, pSession, strlen(pSession));
+	}
+	else{
+		char *session_id = sessionCreate(pUser, "something");
+		pRet = ss;
+		ex_send_msg_session(pHttp, NULL, pRet, strlen(pRet), session_id);
+	}
 
 	return 0;
 }

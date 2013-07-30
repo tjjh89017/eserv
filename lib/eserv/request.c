@@ -70,6 +70,11 @@ static int codeSet(char *pBuf , int code)
 	return sprintf(pBuf, "HTTP/1.1 %d %s\n", code, msg);
 }
 
+static int sessionSet(char *pBuf, const char *session_id){
+
+	return sprintf(pBuf, "Set-Cookie: eserv_session=%s\n", session_id);
+}
+
 int ex_error_reply(const ExHttp *pHttp , int stscode)
 {
 	char buf[128];
@@ -87,6 +92,27 @@ int ex_send_msg(ExHttp *pHttp, const char *type, const char *buf, size_t len)
 	pBuf += codeSet(pBuf, 200);
 	pBuf += typeSet(pBuf, type);
 	pBuf += lengthSet(pBuf, len);
+
+	do {
+		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) < 0)
+			break;
+		if ((ret = ex_sock_nwrite(pHttp->sock, (char *) buf, len)) < 0)
+			break;
+	} while (0);
+	return ret;
+}
+
+// TODO better use HashTable to slove params problem
+
+int ex_send_msg_session(ExHttp *pHttp, const char *type, const char *buf, size_t len, const char *session_id){
+
+	char hBuf[BUFSIZ];
+	char *pBuf = hBuf;
+	int ret;
+	pBuf += codeSet(pBuf, 200);
+	pBuf += typeSet(pBuf, type);
+	pBuf += lengthSet(pBuf, len);
+	pBuf += sessionSet(pBuf, session_id);
 
 	do {
 		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) < 0)

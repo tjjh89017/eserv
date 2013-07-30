@@ -2,6 +2,7 @@
 #include "misc.h"
 #include "http.h"
 #include "hash.h"
+#include "session.h"
 
 static int ex_hashcasecmp_str(const char *s1, const char *s2)
 {
@@ -139,6 +140,7 @@ int ex_init()
 	ExContext.threadCnt = 0;
 
 	cgi_init();
+	ex_session_init();
 	return start_thread((void *) ex_http_start, NULL);
 }
 

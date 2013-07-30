@@ -5,8 +5,8 @@ CC = gcc
 ifeq ($(shell uname),linux)
 SOURCE_FLAGS = -D_POSIX_SOURCE -D_BSD_SOURCE
 endif
-
-CFLAGS = -Os -Wall -Wextra -Werror \
+# -Wall -Werror
+CFLAGS = -Os -Wextra \
 	 $(SOURCE_FLAGS) -g \
 	 -std=gnu99 \
 	 -Iinclude
@@ -14,7 +14,7 @@ CFLAGS = -Os -Wall -Wextra -Werror \
 
 CFLAGS += -m32
 LIBS = -Llib/eserv
-LDFLAGS = -leserv -lpthread
+LDFLAGS = -leserv -lpthread -lcrypt
 
 OBJS = main.o \
 	cgi_custom.o
