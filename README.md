@@ -1,5 +1,9 @@
 eServ: Embedded Web server toolkit written in pure C
 
+Origin
+------
+  * Jserv's eserv https://code.google.com/p/eserv/
+
 Features
 --------
   * Built-in HTTP daemon along with dynamic content management
@@ -28,6 +32,8 @@ Configurations
     static const char *IndexFile = "index.html";
     static const char *RootPath = "www";
 
-Origin
-------
-  * Jserv's eserv https://code.google.com/p/eserv/
+Session
+-------
+  * it works, but it's not GOOD enough.
+
+
