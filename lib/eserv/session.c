@@ -53,7 +53,7 @@ char* sessionFromHeader(char *header_str){
 	
 	ret = strtok(header_str, delim);
 	while(ret != NULL){
-		if(strcmp(ret, "eserv_session") == 0){
+		if(strcmp(ret, SESSION_ID) == 0){
 			ret = strtok(NULL, delim);
 			break;
 		}

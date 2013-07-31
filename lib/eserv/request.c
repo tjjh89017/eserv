@@ -2,6 +2,7 @@
 #include "analysis.h"
 #include "io.h"
 #include "cgi.h"
+#include "session.h"
 
 /* set MIME type, content length, and cache control like expire and
  * last-modified
@@ -72,7 +73,7 @@ static int codeSet(char *pBuf , int code)
 
 static int sessionSet(char *pBuf, const char *session_id){
 
-	return sprintf(pBuf, "Set-Cookie: eserv_session=%s\n", session_id);
+	return sprintf(pBuf, "Set-Cookie: " SESSION_ID "=%s\n", session_id);
 }
 
 int ex_error_reply(const ExHttp *pHttp , int stscode)

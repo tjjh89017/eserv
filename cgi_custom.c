@@ -53,8 +53,9 @@ int cgi_page_login(ExHttp *pHttp)
 	}
 	*/
 	//ex_send_msg(pHttp, NULL, pRet, strlen(pRet));
-	if(pSession != NULL){
-		ex_send_msg(pHttp, NULL, pSession, strlen(pSession));
+	void *data = sessionCheck(pSession);
+	if(data != NULL){
+		ex_send_msg(pHttp, NULL, (char*)data, strlen((char*)data));
 	}
 	else{
 		char *session_id = sessionCreate(pUser, "something");
