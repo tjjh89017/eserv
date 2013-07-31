@@ -46,8 +46,6 @@ void* sessionCheck(const char* session_id){
  * header_str
  */
 
-// TODO don't work at all
-
 char* sessionFromHeader(char *header_str){
 
 	char *ret;
@@ -55,7 +53,7 @@ char* sessionFromHeader(char *header_str){
 	
 	ret = strtok(header_str, delim);
 	while(ret != NULL){
-		if(strcmp(ret, "eserv_session") != 0){
+		if(strcmp(ret, "eserv_session") == 0){
 			ret = strtok(NULL, delim);
 			break;
 		}
