@@ -26,6 +26,7 @@ void ex_hash_clear(ex_hashmap *hm);
 
 int ex_hash_add(ex_hashmap *hm, const void *key, const void *value);
 void* ex_hash_find(const ex_hashmap *hm, const void *key);
+ex_hashlist* ex_hash_next(const ex_hashmap *hm);
 
 int ex_hashfun_str(const char *s);
 

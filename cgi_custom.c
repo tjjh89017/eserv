@@ -85,3 +85,20 @@ int cgi_page_gallery(ExHttp *pHttp)
 	return 0;
 }
 
+/*
+ * Test ex_hash_next if works
+ */
+int cgi_hash_test(ExHttp *pHttp){
+
+	printf("\n---cgi_hash_test---\n");
+
+	ex_hashmap *head_map = &pHttp->headMap;
+	ex_hashlist *cList = ex_hash_next(head_map);
+	
+	while(cList != NULL){
+		printf("%s:%s\n", (char*)cList->key, (char*)cList->value);
+		cList = cList->next;
+	}
+
+	return 0;
+}

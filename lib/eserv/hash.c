@@ -96,3 +96,30 @@ int ex_hashfun_str(const char *s)
 	ret += (odd & mask);
 	return ret;
 }
+
+/*
+ * TODO find all things in HashMap
+ */
+ex_hashlist* ex_hash_next(const ex_hashmap *hm){
+
+	static int bucket_pos = 0;
+	static ex_hashmap *target = NULL;
+	static ex_hashlist *current = NULL;
+
+	if(hm != NULL){
+		target = hm;
+		bucket_pos = 0;
+		current = target->buckets[0];
+	}
+
+	if(current != NULL){
+		if(current->next != NULL)
+			current = current->next;
+		else if(++bucket_pos < target->size)
+			current = target->buckets[bucket_pos];
+		else
+			current = NULL;
+	}
+
+	return current;
+}

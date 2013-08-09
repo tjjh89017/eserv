@@ -8,6 +8,8 @@ extern int cgi_page_txt(ExHttp *pHttp);
 extern int cgi_page_login(ExHttp *pHttp);
 extern int cgi_page_gallery(ExHttp *pHttp);
 
+extern int cgi_hash_test(ExHttp *pHttp);
+
 /* customized page handler declare here */
 cgi_page cgi_pages[] = {
 	{
@@ -28,6 +30,10 @@ cgi_page cgi_pages[] = {
 	{
 		.name = "gallery.cgi",
 		.callback = cgi_page_gallery,
+	},
+	{
+		.name = "hash_test.cgi",
+		.callback = cgi_hash_test,
 	},
 };
 

@@ -35,6 +35,9 @@ password: <input type="text" id="passwd" class="inputtext"/><br />
 <span><a href="gallery.html">Goto gallery</a></span><br />
 <hr />
 
+<button type="button" id="btnHashTest">HashTest</button>
+<hr />
+
 </body>
 
 </html>
@@ -64,6 +67,15 @@ $("#btnGetTxt").click(
 		$.get("txt.cgi" ,
 		function(data){
 			$("#txt")[0].innerHTML=data;
+		})
+	}
+)
+
+$("#btnHashTest").click(
+	function(){
+		$.get("hash_test.cgi",
+		function(data){
+			// do nothing but see command
 		})
 	}
 )

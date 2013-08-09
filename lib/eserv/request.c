@@ -84,6 +84,23 @@ int ex_error_reply(const ExHttp *pHttp , int stscode)
 	pBuf += codeSet(pBuf, stscode);
 	return sendHead(pHttp, buf, pBuf - buf);
 }
+#if 0
+// wait
+/*
+ * use hashmap to set Http Header key-value
+ */
+int ex_send(ExHttp *pHttp, const ex_hashmap *pHeader, const char *type, const void *data){
+	
+	char hBuf[BUFSIZ];
+	char *pBuf = nBuf;
+	int ret;
+
+	pBuf += codeSet(pBuf, 200);
+	
+	
+
+}
+#endif
 
 int ex_send_msg(ExHttp *pHttp, const char *type, const char *buf, size_t len)
 {
