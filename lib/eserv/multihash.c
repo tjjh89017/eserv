@@ -4,6 +4,11 @@
 #include <assert.h>
 #include "multihash.h"
 
+static int ex_hashcmp_str(const char *s1, const char *s2)
+{
+	return (0 == strcmp(s1, s2));
+}
+
 void ex_multihash_init(ex_multihash *mh, ex_mpool *mp, size_t _size)
 {
 	assert(mp != NULL);
@@ -24,7 +29,7 @@ ex_multihash* ex_multihash_new(ex_mpool *mp, size_t _size)
 	return mh;
 }
 
-void ex_hash_clear(ex_multihash *mh)
+void ex_multihash_clear(ex_multihash *mh)
 {
 	ex_hashlist *nl, *cl;
 	struct _mlist *nml, *ml;
@@ -33,8 +38,8 @@ void ex_hash_clear(ex_multihash *mh)
 	do{
 		if(mh->mpool == NULL || mh->mpool->cflag == 0)
 			break;
-		for(i = 0; i < hm->size; i++){
-			cl = hm->buckets[i];
+		for(i = 0; i < mh->size; i++){
+			cl = mh->buckets[i];
 			while(cl != NULL){
 				nl = cl->next;
 				ml = (struct _mlist*)cl->value;
@@ -53,10 +58,10 @@ void ex_hash_clear(ex_multihash *mh)
 	memset(mh, 0, sizeof(*mh));
 }
 
-int ex_hash_add(ex_multihash *mh, const void *key, const void *value)
+int ex_multihash_add(ex_multihash *mh, const void *key, const void *value)
 {
 	int pos = mh->hashfun(key) % mh->size;
-	ex_hashlist *nlh = hm->buckets[pos];
+	ex_hashlist *nlh = mh->buckets[pos];
 	struct _mlist *ml = malloc(sizeof(struct _mlist));
 	ml->value = (void*)value;
 
@@ -68,7 +73,7 @@ int ex_hash_add(ex_multihash *mh, const void *key, const void *value)
 
 	if(nlh == NULL){
 		nlh = (ex_hashlist *)
-			ex_mpool_malloc(hm->mpool, sizeof(ex_hashlist));
+			ex_mpool_malloc(mh->mpool, sizeof(ex_hashlist));
 		nlh->value = NULL;
 	}
 	ml->next = (struct _mlist*)nlh->value;
@@ -81,13 +86,11 @@ int ex_hash_add(ex_multihash *mh, const void *key, const void *value)
 
 void* ex_multihash_find(const ex_multihash *mh, const void *key)
 {
-	static ex_multihash *target = NULL;
 	static struct _mlist *ml = NULL;
 
 	if(key != NULL){
-		target = mh;
-		pos = mh->hashfun(key) % mh->size;
-		nlh = mh->buckets[pos];
+		int pos = mh->hashfun(key) % mh->size;
+		ex_hashlist *nlh = mh->buckets[pos];
 		while(nlh != NULL){
 			if(mh->hashcmp(nlh->key, key)){
 				ml = nlh->value;

@@ -12,7 +12,7 @@ extern "C" {
 struct _mlist{
 	void *value;
 	struct _mlist *next;
-}
+};
 
 typedef struct{
 	ex_hashlist **buckets;
