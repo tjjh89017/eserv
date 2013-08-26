@@ -14,7 +14,7 @@ typedef struct {
 
 void ex_mpool_init(ex_mpool *pmp, char *begin, size_t len);
 void *ex_mpool_malloc(ex_mpool *pmp, size_t mlen);
-void ex_mpool_free(ex_mpool *pmp, void *p);
+int ex_mpool_free(ex_mpool *pmp, void *p);
 void ex_mpool_clear(ex_mpool *pmp);
 
 #ifdef __cplusplus

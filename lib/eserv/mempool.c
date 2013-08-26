@@ -26,13 +26,19 @@ void *ex_mpool_malloc(ex_mpool *pmp, size_t mlen)
 	return ret;
 }
 
-void ex_mpool_free(ex_mpool *pmp, void *p)
+/*
+ * if need to recycle return 1, or 0
+ */
+int ex_mpool_free(ex_mpool *pmp, void *p)
 {
 	/* only perform free when allocated in heap */
 	if (p < (void *) pmp->begin ||
 	    p >= (void *) (pmp->begin + pmp->len)) {
 		free(p);
+		return 0;
 	}
+
+	return 1;
 }
 
 void ex_mpool_clear(ex_mpool *pmp)

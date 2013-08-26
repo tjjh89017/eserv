@@ -21,6 +21,8 @@ void ex_hash_init(ex_hashmap *hm, ex_mpool *mp, size_t _size)
 
 	hm->hashcmp = (void *) ex_hashcmp_str;
 	hm->hashfun = (void *) ex_hashfun_str;
+
+	hm->recycle = NULL;
 }
 
 void ex_hash_clear(ex_hashmap *hm)
@@ -48,9 +50,18 @@ void ex_hash_clear(ex_hashmap *hm)
 int ex_hash_add(ex_hashmap *hm, const void *key, const void *value)
 {
 	int pos = hm->hashfun(key) % hm->size;
-	ex_hashlist *nhl = (ex_hashlist *)
-		ex_mpool_malloc(hm->mpool,
-		                sizeof(ex_hashlist));
+	ex_hashlist *nhl;
+
+	if(hm->recycle){
+		nhl = hm->recycle;
+		hm->recycle = nhl->next;
+		nhl->next = NULL;
+	}
+	else{
+		nhl = (ex_hashlist *)
+			ex_mpool_malloc(hm->mpool,
+			                sizeof(ex_hashlist));
+	}
 
 	nhl->key = (void *) key, nhl->value = (void *) value;
 	nhl->next = hm->buckets[pos];
@@ -72,6 +83,29 @@ void* ex_hash_find(const ex_hashmap *hm, const void *key)
 		nlh = nlh->next;
 	}
 	return ret;
+}
+
+void ex_hash_del(ex_hashmap *hm, const void *key)
+{
+	int pos = hm->hashfun(key) % hm->size;
+	ex_hashlist *nlh = hm->buckets[pos], **last = &hm->buckets[pos];
+
+	while(nlh != NULL){
+		if(hm->hashcmp(nlh->key, key)){
+			*last = nlh->next;
+			free(nlh->key);
+			free(nlh->value);
+			// TODO find a better way to free memory
+			// need to recycle
+			if(ex_mpool_free(hm->mpool, nlh)){
+				nlh->next = hm->recycle;
+				hm->recycle = nlh;
+			}
+			break;
+		}
+		last = &nlh;
+		nlh = nlh->next;
+	}
 }
 
 int ex_hashfun_str(const char *s)

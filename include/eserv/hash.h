@@ -19,6 +19,8 @@ typedef struct {
 	ex_mpool *mpool;
 	int (*hashfun)(const void *key);
 	int (*hashcmp)(const void *lkey, const void *rkey);
+
+	ex_hashlist *recycle;
 } ex_hashmap;
 
 void ex_hash_init(ex_hashmap* hm, ex_mpool *mp , size_t _size);
@@ -26,6 +28,7 @@ void ex_hash_clear(ex_hashmap *hm);
 
 int ex_hash_add(ex_hashmap *hm, const void *key, const void *value);
 void* ex_hash_find(const ex_hashmap *hm, const void *key);
+void ex_hash_del(ex_hashmap *hm, const void *key);
 ex_hashlist* ex_hash_next(const ex_hashmap *hm);
 
 int ex_hashfun_str(const char *s);
