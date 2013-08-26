@@ -18,6 +18,7 @@ LDFLAGS = -lpthread -lcrypt
 OBJS = \
     mempool.o \
 	hash.o \
+	multihash.o \
 	io.o \
 	http.o \
 	request.o \
