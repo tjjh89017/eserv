@@ -28,10 +28,50 @@ int ex_uninit()
 	return 0;
 }
 
-extern void  requestHandler(void * s);
+extern void requestHandler(void * s);
+
+static void do_request(void *s)
+{
+	DBG("do_request");
+	struct bufferevent *bufev = (struct bufferevent*)s;
+	struct event_base *base = event_base_new();
+
+	bufferevent_base_set(base, bufev);
+
+	requestHandler(bufev);
+	bufferevent_free(bufev);
+}
+
+static void do_request_thread(struct bufferevent *bev, void *arg)
+{
+	DBG("do_create_thread");
+
+	start_thread(do_request, bev);
+
+    DBG("do_create_thread END");
+}
+
+static void do_accept(int ser_fd, short event, void *arg)
+{
+	struct event_base *base = (struct event_base*)arg;
+	int cli_fd;
+	struct sockaddr_in sock_in;
+	int sin_size = sizeof(struct sockaddr_in);
+
+	cli_fd = accept(ser_fd, (struct sockaddr*)&sock_in, &sin_size);
+	if(cli_fd < 0){
+		perror("accept");
+		return;
+	}
+
+	struct bufferevent *bev = bufferevent_socket_new(base, cli_fd, BEV_OPT_CLOSE_ON_FREE);
+    bufferevent_setcb(bev, do_request_thread, NULL, NULL, base);
+    bufferevent_enable(bev, EV_READ | EV_WRITE | EV_PERSIST);
+}
 
 static int ex_http_start()
 {
+	struct event_base *base;
 	SOCKET ser_fd, cli_fd;  /* listen on sock_fd, new connection on new_fd */
 	struct sockaddr_in ser_addr, cli_addr; /* connector's address information */
 	int opt, sin_size;
@@ -76,8 +116,21 @@ static int ex_http_start()
 		exit(1);
 	}
 
+	evutil_make_listen_socket_reuseable(ser_fd);
+	evutil_make_socket_nonblocking(ser_fd);
+	evthread_use_pthreads();
+
+	base = event_base_new();
+
+	struct event *listen_event;
+	listen_event = event_new(base, ser_fd, EV_READ|EV_PERSIST, do_accept, (void*)base);
+
+	event_add(listen_event, NULL);
+
 	DBG("\n " SERVER " is running.  Port: %d\n", PORT);
 
+	event_base_dispatch(base);
+#if 0
 	sin_size = sizeof(struct sockaddr_in);
 	while (1) {  /* main accept() loop */
 		if (ExContext.quitFlag == 1)
@@ -95,6 +148,8 @@ static int ex_http_start()
 				ex_sleep(50);
 		}
 	}
+#endif
+
 	return 0;
 }
 

@@ -14,7 +14,7 @@ CFLAGS = -Os -Wextra \
 
 CFLAGS += -m32
 LIBS = -Llib/eserv
-LDFLAGS = -leserv -lpthread -lcrypt
+LDFLAGS = -leserv -levent_pthreads -levent -lpthread -lcrypt
 
 OBJS = main.o \
 	cgi_custom.o

@@ -10,7 +10,8 @@ static inline int sendFileStream_posix(const ExHttp *pHttp, const char *filePath
 	int fd = open(filePath, O_RDONLY | O_BINARY);
 	assert(fd >= 0);
 	while ((rSize = read(fd, buf, sizeof(buf))) > 0) {
-		if ((ret = ex_sock_nwrite(pHttp->sock, buf, rSize)) < 0)
+		//if ((ret = ex_sock_nwrite(pHttp->sock, buf, rSize)) < 0)
+		if ((ret = ex_sock_nwrite(pHttp->bufev, buf, rSize)) < 0)
 			break;
 	}
 	close(fd);
@@ -22,6 +23,16 @@ int sendFileStream(const ExHttp *pHttp, const char *filePath)
 	return sendFileStream_posix(pHttp, filePath);
 }
 
+static int ex_sock_recv(struct bufferevent *bufev, char *buf, size_t bufsize)
+{
+	int ret;
+	do {
+		//ret = recv(sock, buf, bufsize, 0);
+		ret = bufferevent_read(bufev, buf, bufsize);
+	} while (ret < 0 && EX_SOCK_ERRNO == EINTR);
+	return ret;
+}
+#if 0
 static int ex_sock_recv(SOCKET sock, char *buf, size_t bufsize)
 {
 	int ret;
@@ -30,7 +41,26 @@ static int ex_sock_recv(SOCKET sock, char *buf, size_t bufsize)
 	} while (ret < 0 && EX_SOCK_ERRNO == EINTR);
 	return ret;
 }
+#endif
 
+int ex_sock_nread(struct bufferevent *bufev, char *buf, size_t n)
+{
+	size_t nRead = 0;
+	size_t nLeft = n;
+	int ret;
+	while (nLeft > 0) {
+		ret = ex_sock_recv(bufev, buf + nRead,
+		                   MIN(nLeft, EX_TCP_QUAN));
+		if (ret <= 0)
+			break;
+		else {
+			nRead += ret;
+			nLeft -= ret;
+		}
+	}
+	return nRead == n ? (int) n : -1;
+}
+#if 0
 int ex_sock_nread(SOCKET sock, char *buf, size_t n)
 {
 	size_t nRead = 0;
@@ -48,7 +78,28 @@ int ex_sock_nread(SOCKET sock, char *buf, size_t n)
 	}
 	return nRead == n ? (int) n : -1;
 }
+#endif
 
+int ex_sock_nwrite(struct bufferevent *bufev, char *buf, size_t n)
+{
+	size_t nLeft = n;
+	size_t nExite = 0;
+	int ret;
+	while (nLeft > 0) {
+		//ret = send(sock, buf + nExite, nLeft, 0);
+		DBG("ex_sock_nwrite");
+		ret = bufferevent_write(bufev, buf + nExite, nLeft);
+		//if (ret == 0 || (ret < 0 && EX_SOCK_ERRNO != EINTR))
+		if (ret < 0 && EX_SOCK_ERRNO != EINTR)
+			break;
+		else {
+			nLeft -= ret;
+			nExite += ret;
+		}
+	}
+	return (nExite == n) ? (int) n : -1;
+}
+#if 0
 int ex_sock_nwrite(SOCKET sock, char *buf, size_t n)
 {
 	size_t nLeft = n;
@@ -65,6 +116,7 @@ int ex_sock_nwrite(SOCKET sock, char *buf, size_t n)
 	}
 	return (nExite == n) ? (int) n : -1;
 }
+#endif
 
 static int isHeadEnd(char *pBuf, char *cPos, int len)
 {
@@ -84,6 +136,22 @@ static int isHeadEnd(char *pBuf, char *cPos, int len)
 	return -1;
 }
 
+int ex_read_head(struct bufferevent *bufev, char *buf, size_t bufsize)
+{
+	int nRead = 0;
+	int rsize;
+	int flag = -1;
+	do {
+		rsize = ex_sock_recv(bufev, buf + nRead, bufsize - nRead);
+		if (rsize <= 0)
+			break;
+		flag = isHeadEnd(buf, buf + nRead, rsize);
+		nRead += rsize;
+	} while (flag < 0);
+
+	return (flag < 0) ? -1 : nRead;
+}
+#if 0
 int ex_read_head(SOCKET sock, char *buf, size_t bufsize)
 {
 	int nRead = 0;
@@ -99,6 +167,7 @@ int ex_read_head(SOCKET sock, char *buf, size_t bufsize)
 
 	return (flag < 0) ? -1 : nRead;
 }
+#endif
 
 int ex_load_body(ExHttp *pHttp)
 {
@@ -133,9 +202,10 @@ int ex_load_body(ExHttp *pHttp)
 				pHttp->postData = malloc(cLen + 8);
 				memmove(pHttp->postData , pHttp->curPos , sLen);
 			}
-			ret = ex_sock_nread(pHttp->sock,
+			/*ret = ex_sock_nread(pHttp->sock,
 			                    pHttp->postData + sLen,
-					    cLen - sLen);
+					    cLen - sLen);*/
+			ret = ex_sock_nread(pHttp->bufev, pHttp->postData + sLen, cLen - sLen);
 			if (cLen - sLen == ret) {
 				ret = 2;
 			}

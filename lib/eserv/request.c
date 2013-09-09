@@ -245,7 +245,8 @@ static int replyHandler(ExHttp *pHttp)
 
 void requestHandler(void *s)
 {
-	SOCKET sock = *((SOCKET*)s);
+	struct bufferevent *bev = (struct bufferevent*)s;
+	//SOCKET sock = *((SOCKET*)s);
 	char recvBuf[MAX_HEADER_SIZE + 8];
 
 	char pool[512];
@@ -254,13 +255,15 @@ void requestHandler(void *s)
 
 	++ExContext.threadCnt;
 
-	httpInfo.sock = sock;
+	httpInfo.bufev = bev;
+	//httpInfo.sock = sock;
 	ex_mpool_init(&httpInfo.mp, pool, sizeof(pool));
 	do {
 		if (ExContext.quitFlag == 1)
 			break;
 
-		httpInfo.recvLen = ex_read_head(sock, recvBuf, MAX_HEADER_SIZE);
+		httpInfo.recvLen = ex_read_head(bev, recvBuf, MAX_HEADER_SIZE);
+		//httpInfo.recvLen = ex_read_head(sock, recvBuf, MAX_HEADER_SIZE);
 		if (httpInfo.recvLen <= 0)
 			break;
 
@@ -293,6 +296,6 @@ void requestHandler(void *s)
 		}
 	} while (1);
 
-	closesocket(sock);
+	//closesocket(sock);
 	--ExContext.threadCnt;
 }

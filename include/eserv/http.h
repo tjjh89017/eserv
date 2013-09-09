@@ -8,6 +8,9 @@ extern "C" {
 #include "entry.h"
 #include "hash.h"
 
+#include <event2/event.h>
+#include <event2/bufferevent.h>
+
 #define IndexFile 	"index.html"
 #define RootPath 	"www"
 #define CgiExt		".cgi"
@@ -59,6 +62,7 @@ typedef struct {
 	/* the file stat(if static file) */
 	struct stat st;
 	SOCKET sock;
+	struct bufferevent *bufev;
 	int recvLen;
 	char *curPos;
 	char *paramEndPos;

@@ -7,9 +7,11 @@ extern "C" {
 
 #include "http.h"
 
-int ex_sock_nwrite(SOCKET sock, char *buf, size_t n);
+//int ex_sock_nwrite(SOCKET sock, char *buf, size_t n);
+int ex_sock_nwrite(struct bufferevent *bufev, char *buf, size_t n);
 
-int ex_read_head(SOCKET sock, char *buf, size_t bufsize);
+//int ex_read_head(SOCKET sock, char *buf, size_t bufsize);
+int ex_read_head(struct bufferevent *bufev, char *buf, size_t bufsize);
 int ex_load_body(ExHttp *pHttp);
 int sendFileStream(const ExHttp *pHttp, const char *filePath);
 
