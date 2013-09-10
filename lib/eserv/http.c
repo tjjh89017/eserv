@@ -42,13 +42,32 @@ static void do_request(void *s)
 	bufferevent_free(bufev);
 }
 
-static void do_request_thread(struct bufferevent *bev, void *arg)
+static void do_request_thread(struct bufferevent *bufev, void *arg)
 {
 	DBG("do_create_thread");
 
-	start_thread(do_request, bev);
+	start_thread(do_request, bufev);
 
     DBG("do_create_thread END");
+}
+
+static void do_end(struct bufferevent *bufev, void *arg)
+{
+
+}
+
+static void do_error(struct bufferevent *bufev, short event, void *arg)
+{
+	if(event & BEV_EVENT_READING)
+		DBG("Error when Reading");
+	else if(event & BEV_EVENT_WRITING)
+		DBG("Error when Writing");
+	else if(event & BEV_EVENT_TIMEOUT)
+		DBG("Error when Timeout");
+	else if(event & BEV_EVENT_ERROR)
+		DBG("Error");
+
+	bufferevent_free(bufev);
 }
 
 static void do_accept(int ser_fd, short event, void *arg)
@@ -65,8 +84,8 @@ static void do_accept(int ser_fd, short event, void *arg)
 	}
 
 	struct bufferevent *bev = bufferevent_socket_new(base, cli_fd, BEV_OPT_CLOSE_ON_FREE);
-    bufferevent_setcb(bev, do_request_thread, NULL, NULL, base);
-    bufferevent_enable(bev, EV_READ | EV_WRITE | EV_PERSIST);
+    bufferevent_setcb(bev, do_request_thread, do_end, do_error, base);
+    bufferevent_enable(bev, EV_READ | EV_WRITE);
 }
 
 static int ex_http_start()
@@ -118,7 +137,7 @@ static int ex_http_start()
 
 	evutil_make_listen_socket_reuseable(ser_fd);
 	evutil_make_socket_nonblocking(ser_fd);
-	evthread_use_pthreads();
+	//evthread_use_pthreads();
 
 	base = event_base_new();
 

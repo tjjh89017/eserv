@@ -37,7 +37,8 @@ static int sendHead(const ExHttp *pHttp, char *pBuf, size_t len)
 	size_t nLen;
 	nLen = sprintf(pBuf + len, "Server: " SERVER "\n\n");
 	DBG("%s", pBuf);
-	return ex_sock_nwrite(pHttp->sock, pBuf, len + nLen);
+	//return ex_sock_nwrite(pHttp->sock, pBuf, len + nLen);
+	return ex_sock_nwrite(pHttp->bufev, pBuf, len + nLen);
 }
 
 static int codeSet(char *pBuf , int code)
@@ -47,8 +48,8 @@ static int codeSet(char *pBuf , int code)
 	const char *c400 = "Bad Request";
 	const char *c404 = "Not Found";
 	const char *c501 = "Not Implemented";
-
-	const char *msg = NULL;
+const
+	 char *msg = NULL;
 	switch (code) {
 	case 200:
 		msg = c200;
@@ -114,7 +115,8 @@ int ex_send_msg(ExHttp *pHttp, const char *type, const char *buf, size_t len)
 	do {
 		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) < 0)
 			break;
-		if ((ret = ex_sock_nwrite(pHttp->sock, (char *) buf, len)) < 0)
+		//if ((ret = ex_sock_nwrite(pHttp->sock, (char *) buf, len)) < 0)
+		if ((ret = ex_sock_nwrite(pHttp->bufev, (char *) buf, len)) < 0)
 			break;
 	} while (0);
 	return ret;
@@ -135,7 +137,7 @@ int ex_send_msg_session(ExHttp *pHttp, const char *type, const char *buf, size_t
 	do {
 		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) < 0)
 			break;
-		if ((ret = ex_sock_nwrite(pHttp->sock, (char *) buf, len)) < 0)
+		if ((ret = ex_sock_nwrite(pHttp->bufev, (char *) buf, len)) < 0)
 			break;
 	} while (0);
 	return ret;
@@ -162,6 +164,7 @@ int ex_send_file(ExHttp *pHttp , const char *filePath)
 
 static int staticProcess(const ExHttp *pHttp)
 {
+	DBG("\nstaticProcess\n");
 	char buf[BUFSIZ];
 	char *pBuf = buf;
 	int ret = 0;

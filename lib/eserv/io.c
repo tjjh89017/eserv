@@ -89,15 +89,18 @@ int ex_sock_nwrite(struct bufferevent *bufev, char *buf, size_t n)
 		//ret = send(sock, buf + nExite, nLeft, 0);
 		DBG("ex_sock_nwrite");
 		ret = bufferevent_write(bufev, buf + nExite, nLeft);
-		//if (ret == 0 || (ret < 0 && EX_SOCK_ERRNO != EINTR))
-		if (ret < 0 && EX_SOCK_ERRNO != EINTR)
+		DBG("ex_sock_nwrite2 ret: %d", ret);
+		break;
+		if (ret == 0 || (ret < 0 && EX_SOCK_ERRNO != EINTR))
 			break;
 		else {
-			nLeft -= ret;
-			nExite += ret;
+			
+			//nLeft -= ret;
+			//nExite += ret;
 		}
 	}
-	return (nExite == n) ? (int) n : -1;
+	//return (nExite == n) ? (int) n : -1;
+	return (ret == 0) ? (int)n : -1;
 }
 #if 0
 int ex_sock_nwrite(SOCKET sock, char *buf, size_t n)
