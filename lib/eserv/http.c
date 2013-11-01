@@ -33,11 +33,8 @@ extern void requestHandler(void * s);
 static void do_request(struct bufferevent *bufev, void *arg)
 {
 	DBG("do_request");
-	struct event_base *base = bufferevent_get_base(bufev);
-	//bufferevent_base_set(base, bufev);
 	requestHandler(bufev);
 	bufferevent_free(bufev);
-	event_base_loopbreak(base);
 }
 
 static void do_end(struct bufferevent *bufev, void *arg)
@@ -59,26 +56,16 @@ static void do_error(struct bufferevent *bufev, short event, void *arg)
 	bufferevent_free(bufev);
 }
 
-
-static void do_request_thread(void *s)
+static void do_event_loop(void *s)
 {
-	DBG("do_create_thread");
-	int cli_fd = *((int*)s);
-	struct event_base *base;
-	if((base = event_base_new()) == NULL){
-		perror("Thread: base_base_new Error");
-		return;
-	}
-	DBG("start create bufferevent");
-	struct bufferevent *bufev = bufferevent_socket_new(base, cli_fd, BEV_OPT_CLOSE_ON_FREE);
-    bufferevent_setcb(bufev, do_request, do_end, do_error, base);
-    bufferevent_enable(bufev, EV_READ | EV_WRITE);
-
+	struct bufferevent *bufev = (struct bufferevent*)s;
+	struct event_base *base = bufferevent_get_base(bufev);
 	event_base_dispatch(base);
-	
-    DBG("do_create_thread END");
-}
 
+	bufferevent_free(bufev);
+	event_base_free(base);
+	DBG("do_event_loop");
+}
 
 static void do_accept(int ser_fd, short event, void *arg)
 {
@@ -93,7 +80,16 @@ static void do_accept(int ser_fd, short event, void *arg)
 		return;
 	}
 
-    start_thread(do_request_thread, &cli_fd);
+	if((base = event_base_new()) == NULL){
+		perror("Thread: base_base_new Error");
+		return;
+	}
+	DBG("start create bufferevent");
+	struct bufferevent *bufev = bufferevent_socket_new(base, cli_fd, BEV_OPT_CLOSE_ON_FREE);
+    bufferevent_setcb(bufev, do_request, do_end, do_error, base);
+    bufferevent_enable(bufev, EV_READ | EV_WRITE | EV_PERSIST);
+
+	start_thread(do_event_loop, bufev);
 }
 
 static int ex_http_start()

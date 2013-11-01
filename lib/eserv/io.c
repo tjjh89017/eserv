@@ -82,6 +82,11 @@ int ex_sock_nread(SOCKET sock, char *buf, size_t n)
 
 int ex_sock_nwrite(struct bufferevent *bufev, char *buf, size_t n)
 {
+	DBG("ex_sock_nwrite");
+	int ret = bufferevent_write(bufev, buf, n);
+	DBG("ex_sock_nwrite ret:%d", ret);
+	return (ret == 0) ? n : -1;
+	#if 0
 	size_t nLeft = n;
 	size_t nExite = 0;
 	int ret;
@@ -101,6 +106,7 @@ int ex_sock_nwrite(struct bufferevent *bufev, char *buf, size_t n)
 	}
 	//return (nExite == n) ? (int) n : -1;
 	return (ret == 0) ? (int)n : -1;
+	#endif
 }
 #if 0
 int ex_sock_nwrite(SOCKET sock, char *buf, size_t n)

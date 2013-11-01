@@ -113,10 +113,10 @@ int ex_send_msg(ExHttp *pHttp, const char *type, const char *buf, size_t len)
 	pBuf += lengthSet(pBuf, len);
 
 	do {
-		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) < 0)
+		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) == 0)
 			break;
 		//if ((ret = ex_sock_nwrite(pHttp->sock, (char *) buf, len)) < 0)
-		if ((ret = ex_sock_nwrite(pHttp->bufev, (char *) buf, len)) < 0)
+		if ((ret = ex_sock_nwrite(pHttp->bufev, (char *) buf, len)) == 0)
 			break;
 	} while (0);
 	return ret;
