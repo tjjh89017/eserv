@@ -26,7 +26,8 @@ OBJS = \
 	entry.o \
 	cgi.o \
 	misc.o \
-	session.o
+	session.o \
+	tpool.o
 
 .c.o:
 	$(CC) $(CFLAGS)  -c $*.c
