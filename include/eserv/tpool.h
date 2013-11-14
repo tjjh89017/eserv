@@ -11,6 +11,9 @@ typedef struct _job{
 typedef struct{
 	int max_threads;
 	int max_queue_size;
+	int block_queue_full;
+	int queue_size;
+	int queue_closed;
 	int shutdown;
 	ex_job *queue_head;
 	ex_job *queue_tail;
