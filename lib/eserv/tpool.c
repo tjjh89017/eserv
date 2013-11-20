@@ -57,7 +57,99 @@ int ex_tpool_add(ex_tpool *tpool, void (*routine)(void*), void *arg)
 
 
 }
-int ex_tpool_free(ex_tpool *tpool, int finish_queue);
-void* ex_tpool_work(ex_tpool *tpool);
 
+int ex_tpool_free(ex_tpool *tpool, int finish_queue)
+{
+	int i = 0;
+	ex_job *job = NULL;
+
+	if(pthread_mutex_lock(&(tpool->queue_lock)) != 0)
+		perror("pthread lock fail");
+
+	if(tpool->queue_closed || tpool->shutdown){
+		pthread_mutex(&(tpool->queue_lock));
+		retrun 0;
+	}
+
+	tpool->queue_closed = 1
+
+	if(finish_queue){
+		while(tpool->queue_size != 0){
+			if(pthread_cond_wait(&(tpool->queue_empty), &(tpool->queue_lock)) != 0){
+				pthread_mutex_unlock(&tpool->queue_lock);
+				perror("finish queue error");
+			}
+		}
+	}
+
+	tpool->shutdown = 1;
+	if(pthread_mutex_unlock(&(tpool->queue_lock)) != 0){
+		perror("unlock error");
+		return 1;
+	}
+
+	if(pthread_cond_broadcast(&(tpool->queue_not_empty)) != 0){
+		perror("broadcast error");
+		return 1;
+	}
+
+	for(i = 0; i < tpool->max_threads; i++){
+		if(pthread_join(tpool->threads[i], NULL) != 0){
+			perror("pthread join error");
+		}
+	}
+
+	free(tpool->threads);
+
+	while(tpool->queue_head != NULL){
+		job = tpool->queue_head;
+		tpool->queue_head = tpool->queue_head->next;
+		free(job);
+	}
+
+	pthread_mutex_destroy(&(tpool->queue_lock));
+	pthread_cond_destroy(&(tpool->queue_not_empty));
+	pthread_cond_destroy(&(tpool->queue_not_full));
+	pthread_cond_destroy(&(tpool->queue_empty));
+
+	free(tpool);
+
+	return 0;
+}
+
+void* ex_tpool_work(ex_tpool *tpool)
+{
+	ex_job *job = NULL;
+	
+	while(1){
+		pthread_mutex_lock(&(tpool->queue_lock));
+		while(tpool->queue_size == 0 && !tpool->shutdown){
+			pthread_cond_wiat(&(tpool->queue_not_empty), &(tpool->queue_lock));
+		}
+
+		if(tpool->shutdown){
+			pthread_mutex_unlock(&(tpool->queue_lock));
+			pthread_exit(NULL);
+		}
+
+		job = tpool->queue_head;
+		tpool->queue_size--;
+
+		if(tpool->queue_size == 0){
+			tpool->queue_head = tpool->queue_tail = NULL;
+			pthread_cond_singal(&(tpool->queue_empty));
+		}
+		else{
+			tpool->queue_head = job->next;
+		}
+
+		if(tpool->block_queue_full && tpool->queue_size == tpool->max_queue_size - 1){
+			pthread_cond_singak(&(tpool->queue_not_full));
+		}
+
+		pthread_mutex_unlock(&(tpool->queue_lock));
+		(*(job->routine))(job->arg);
+		free(job);
+	}
+}
 
