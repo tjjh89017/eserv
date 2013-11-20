@@ -3,6 +3,7 @@
 #include "http.h"
 #include "hash.h"
 #include "session.h"
+#include "tpool.h"
 
 static int ex_hashcasecmp_str(const char *s1, const char *s2)
 {

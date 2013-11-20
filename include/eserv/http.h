@@ -26,6 +26,9 @@ extern "C" {
 /* the max thread number */
 #define EX_MAX_THREADS 		10
 
+/* the max queue size */
+#define EX_MAX_QUEUE 50
+
 /* socket receive timeout, 500ms may be ok */
 #define  EX_SOCK_RTT		500
 

@@ -26,9 +26,10 @@ int sendFileStream(const ExHttp *pHttp, const char *filePath)
 static int ex_sock_recv(struct bufferevent *bufev, char *buf, size_t bufsize)
 {
 	int ret;
+	struct evbuffer *evbuf = bufferevent_get_input(bufev);
 	do {
 		//ret = recv(sock, buf, bufsize, 0);
-		ret = bufferevent_read(bufev, buf, bufsize);
+		ret = evbuffer_remove(evbuf, buf, bufsize);
 	} while (ret < 0 && EX_SOCK_ERRNO == EINTR);
 	return ret;
 }
@@ -82,8 +83,9 @@ int ex_sock_nread(SOCKET sock, char *buf, size_t n)
 
 int ex_sock_nwrite(struct bufferevent *bufev, char *buf, size_t n)
 {
+	struct evbuffer *evbuf = bufferevent_get_output(bufev);
 	DBG("ex_sock_nwrite");
-	int ret = bufferevent_write(bufev, buf, n);
+	int ret = evbuffer_add(evbuf, buf, n);
 	DBG("ex_sock_nwrite ret:%d", ret);
 	return (ret == 0) ? n : -1;
 	#if 0
