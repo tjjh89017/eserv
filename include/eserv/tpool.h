@@ -1,11 +1,14 @@
 #ifndef __ESERV_TPOOL_H__
 #define __ESERV_TPOOL_H__
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 
 typedef struct _job{
 	void (*routine)(void*);
 	void *arg;
+	struct _job *next;
 } ex_job;
 
 typedef struct{

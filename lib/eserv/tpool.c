@@ -11,7 +11,7 @@ ex_tpool* ex_tpool_new(int max_threads, int max_queue_size, int block_queue_full
 	tpool->max_queue_size = max_queue_size;
 	tpool->block_queue_full = block_queue_full;
 	
-	if((tpool->threads = (pthread*)malloc(sizeof(pthread_t) * max_threads)) == NULL)
+	if((tpool->threads = (pthread_t*)malloc(sizeof(pthread_t) * max_threads)) == NULL)
 		perror("ex_tpool_new: threads malloc error");
 	tpool->queue_size = 0;
 	tpool->queue_head = NULL;
@@ -68,10 +68,10 @@ int ex_tpool_free(ex_tpool *tpool, int finish_queue)
 
 	if(tpool->queue_closed || tpool->shutdown){
 		pthread_mutex(&(tpool->queue_lock));
-		retrun 0;
+		return 0;
 	}
 
-	tpool->queue_closed = 1
+	tpool->queue_closed = 1;
 
 	if(finish_queue){
 		while(tpool->queue_size != 0){
