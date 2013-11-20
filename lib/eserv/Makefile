@@ -13,7 +13,7 @@ CFLAGS = -Os -Wall -Wextra \
 
 CFLAGS += -m32
 
-LDFLAGS = -levent_pthread -levent -lpthread -lcrypt
+LDFLAGS = -levent_pthreads -levent -lpthread -lcrypt
 
 OBJS = \
     mempool.o \

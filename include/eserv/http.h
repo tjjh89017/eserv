@@ -9,11 +9,17 @@ extern "C" {
 #include "hash.h"
 
 #include <event2/event.h>
+#include <event2/listener.h>
+#include <event2/thread.h>
+#include <event2/buffer.h>
 #include <event2/bufferevent.h>
 
 #define IndexFile 	"index.html"
 #define RootPath 	"www"
 #define CgiExt		".cgi"
+
+/* */
+#define LISTEN_BACKLOG  65535
 
 /* for cache usage, default is one-day. */
 #define ExpireTime 	(24 * 60 * 60)

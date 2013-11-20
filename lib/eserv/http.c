@@ -34,8 +34,10 @@ extern void requestHandler(void * s);
 static void do_request(struct bufferevent *bufev, void *arg)
 {
 	DBG("do_request");
-	requestHandler(bufev);
-	bufferevent_free(bufev);
+	if(ex_tpool_add((ex_tpool*)arg, requestHandler, bufev)){
+		perror("request error");
+		exit(1);
+	}
 }
 
 static void do_end(struct bufferevent *bufev, void *arg)
@@ -57,40 +59,20 @@ static void do_error(struct bufferevent *bufev, short event, void *arg)
 	bufferevent_free(bufev);
 }
 
-static void do_event_loop(void *s)
+static void do_accept(struct evconnlistener* listener, evutil_socket_t fd, struct sockaddr* sa, int event_code, void* arg)
 {
-	struct bufferevent *bufev = (struct bufferevent*)s;
-	struct event_base *base = bufferevent_get_base(bufev);
-	event_base_dispatch(base);
-
-	bufferevent_free(bufev);
-	event_base_free(base);
-	DBG("do_event_loop");
+	struct event_base *base = evconnlistener_get_base(listener);
+	DBG("start create bufferevent");
+	struct bufferevent *bufev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
+    bufferevent_setcb(bufev, do_request, do_end, do_error, arg);
+    bufferevent_enable(bufev, EV_READ | EV_WRITE);
 }
 
-static void do_accept(int ser_fd, short event, void *arg)
+void handleSigint(evutil_socket_t fd, short event_code, void* arg)
 {
-	struct event_base *base;
-	int cli_fd;
-	struct sockaddr_in sock_in;
-	int sin_size = sizeof(struct sockaddr_in);
-
-	cli_fd = accept(ser_fd, (struct sockaddr*)&sock_in, &sin_size);
-	if(cli_fd < 0){
-		perror("accept");
-		return;
-	}
-
-	if((base = event_base_new()) == NULL){
-		perror("Thread: base_base_new Error");
-		return;
-	}
-	DBG("start create bufferevent");
-	struct bufferevent *bufev = bufferevent_socket_new(base, cli_fd, BEV_OPT_CLOSE_ON_FREE);
-    bufferevent_setcb(bufev, do_request, do_end, do_error, base);
-    bufferevent_enable(bufev, EV_READ | EV_WRITE | EV_PERSIST);
-
-	start_thread(do_event_loop, bufev);
+	evconnlistener_free((struct evconnlistener*) arg);
+	//shutDown(0);
+	exit(0);
 }
 
 static int ex_http_start()
@@ -99,6 +81,8 @@ static int ex_http_start()
 	SOCKET ser_fd, cli_fd;  /* listen on sock_fd, new connection on new_fd */
 	struct sockaddr_in ser_addr, cli_addr; /* connector's address information */
 	int opt, sin_size;
+	struct evconnlistener *listener;
+	ex_tpool *tpool = NULL;
 
 	/* Setup the default values */
 	struct timeval tv;
@@ -108,22 +92,24 @@ static int ex_http_start()
 	/*
 	* Setup the sockets and wait and process connections
 	*/
+#if 0
 	if ((ser_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		exit(1);
 	}
-
+#endif
 	/* Let the kernel reuse the socket address. This lets us run
 	   twice in a row without waiting for the (ip, port) tuple
 	   to time out. */
+#if 0
 	opt = 1;
 	setsockopt(ser_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt));
 	setsockopt(ser_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
-
+#endif
 	ser_addr.sin_family = AF_INET;		/* host byte order */
 	ser_addr.sin_port = htons(PORT);	/* short, network byte order */
 	ser_addr.sin_addr.s_addr = INADDR_ANY;	/* auto-fill with my IP */
-
+#if 0
 	if (bind(ser_fd, (struct sockaddr *) &ser_addr,
 	         sizeof(struct sockaddr)) == -1) {
 		perror("bind");
@@ -134,26 +120,39 @@ static int ex_http_start()
 		perror("listen");
 		exit(1);
 	}
-
+#endif
 	if (chdir(RootPath) != 0) {
 		perror("chdir");
 		exit(1);
 	}
 
-	evutil_make_listen_socket_reuseable(ser_fd);
-	evutil_make_socket_nonblocking(ser_fd);
-	//evthread_use_pthreads();
+	/*evutil_make_listen_socket_reuseable(ser_fd);
+	evutil_make_socket_nonblocking(ser_fd);*/
+	evthread_use_pthreads();
 
 	base = event_base_new();
 
-	struct event *listen_event;
-	listen_event = event_new(base, ser_fd, EV_READ|EV_PERSIST, do_accept, (void*)base);
+	if((tpool = ex_tpool_new(EX_MAX_THREADS, EX_MAX_QUEUE, 1)) == NULL){
+		perror("tpool new fail");
+		exit(1);
+	}
 
-	event_add(listen_event, NULL);
+	if(!(listener = evconnlistener_new_bind(base, do_accept, tpool, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, LISTEN_BACKLOG, (struct sockaddr*)&ser_addr, sizeof(ser_addr)))){
+		perror("listener fail");
+		exit(1);
+	}
+	/* evconnlistener_set_error_cb(listener, NULL); */
+
+
+
+	struct event *listen_event;
+	listen_event = evsignal_new(base, SIGINT, handleSigint, listener);
+	evsignal_add(listen_event, NULL);
 
 	DBG("\n " SERVER " is running.  Port: %d\n", PORT);
 
 	event_base_dispatch(base);
+	event_del(listen_event);
 #if 0
 	sin_size = sizeof(struct sockaddr_in);
 	while (1) {  /* main accept() loop */

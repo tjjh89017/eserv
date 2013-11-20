@@ -21,11 +21,11 @@ ex_tpool* ex_tpool_new(int max_threads, int max_queue_size, int block_queue_full
 
 	if((rtn = pthread_mutex_init(&(tpool->queue_lock), NULL)) != 0)
 		perror("ex_tpool_new: queue_lock init error");
-	if((rtn = othread_cond_init(&(tpool->queue_not_empty), NULL)) != 0)
+	if((rtn = pthread_cond_init(&(tpool->queue_not_empty), NULL)) != 0)
 		perror("ex_tpool_new: queue_not_epmty init error");
-	if((rtn = othread_cond_init(&(tpool->queue_not_full), NULL)) != 0)
+	if((rtn = pthread_cond_init(&(tpool->queue_not_full), NULL)) != 0)
 		perror("ex_tpool_new: queue_not_full init error");
-	if((rtn = othread_cond_init(&(tpool->queue_empty), NULL)) != 0)
+	if((rtn = pthread_cond_init(&(tpool->queue_empty), NULL)) != 0)
 		perror("ex_tpool_new: queue_empty init error");
 
 	for(i = 0; i < max_threads; i++){
@@ -51,11 +51,27 @@ int ex_tpool_add(ex_tpool *tpool, void (*routine)(void*), void *arg)
 	}
 	if (tpool->shutdown || tpool->queue_closed){
 		pthread_mutex_unlock(&tpool->queue_lock);
-		return 0;
+		return 1;
 	}
 
+	job = (ex_job*)malloc(sizeof(ex_job));
+	job->routine = routine;
+	job->arg = arg;
+	job->next = NULL;
 
+	if(tpool->queue_size == 0){
+		tpool->queue_tail = tpool->queue_head = job;
+	}
+	else{
+		tpool->queue_tail->next = job;
+		tpool->queue_tail = job;
+	}
 
+	tpool->queue_size++;
+	pthread_cond_signal(&tpool->queue_not_empty);
+	pthread_mutex_unlock(&tpool->queue_lock);
+
+	return 0;
 }
 
 int ex_tpool_free(ex_tpool *tpool, int finish_queue)
@@ -67,7 +83,7 @@ int ex_tpool_free(ex_tpool *tpool, int finish_queue)
 		perror("pthread lock fail");
 
 	if(tpool->queue_closed || tpool->shutdown){
-		pthread_mutex(&(tpool->queue_lock));
+		pthread_mutex_unlock(&(tpool->queue_lock));
 		return 0;
 	}
 
@@ -122,9 +138,10 @@ void* ex_tpool_work(ex_tpool *tpool)
 	ex_job *job = NULL;
 	
 	while(1){
+		DBG("pid: %d", pthread_self());
 		pthread_mutex_lock(&(tpool->queue_lock));
 		while(tpool->queue_size == 0 && !tpool->shutdown){
-			pthread_cond_wiat(&(tpool->queue_not_empty), &(tpool->queue_lock));
+			pthread_cond_wait(&(tpool->queue_not_empty), &(tpool->queue_lock));
 		}
 
 		if(tpool->shutdown){
@@ -137,14 +154,14 @@ void* ex_tpool_work(ex_tpool *tpool)
 
 		if(tpool->queue_size == 0){
 			tpool->queue_head = tpool->queue_tail = NULL;
-			pthread_cond_singal(&(tpool->queue_empty));
+			pthread_cond_signal(&(tpool->queue_empty));
 		}
 		else{
 			tpool->queue_head = job->next;
 		}
 
 		if(tpool->block_queue_full && tpool->queue_size == tpool->max_queue_size - 1){
-			pthread_cond_singak(&(tpool->queue_not_full));
+			pthread_cond_signal(&(tpool->queue_not_full));
 		}
 
 		pthread_mutex_unlock(&(tpool->queue_lock));
