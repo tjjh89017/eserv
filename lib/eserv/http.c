@@ -36,7 +36,6 @@ static void do_request(struct bufferevent *bufev, void *arg)
 	DBG("do_request");
 	if(ex_tpool_add((ex_tpool*)arg, requestHandler, bufev)){
 		perror("request error");
-		exit(1);
 	}
 }
 
