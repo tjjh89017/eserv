@@ -47,12 +47,7 @@ int cgi_page_login(ExHttp *pHttp)
 	pSession = sessionFromHeader(get_head_info(pHttp, "Cookie"));
 	pUser = get_param_info(pHttp, "user");
 	pPasswd = get_param_info(pHttp, "passwd");
-	/*
-	if (strcmp(user, pUser) == 0 && strcmp(passwd, pPasswd) == 0) {
-		pRet = smsg;
-	}
-	*/
-	//ex_send_msg(pHttp, NULL, pRet, strlen(pRet));
+
 	void *data = sessionCheck(pSession);
 	if(data != NULL){
 		ex_send_msg(pHttp, NULL, (char*)data, strlen((char*)data));
@@ -62,7 +57,7 @@ int cgi_page_login(ExHttp *pHttp)
 		pRet = ss;
 		ex_send_msg_session(pHttp, NULL, pRet, strlen(pRet), session_id);
 	}
-
+	DBG("cgi login end");
 	return 0;
 }
 

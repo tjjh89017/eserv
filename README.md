@@ -35,5 +35,6 @@ Configurations
 Session
 -------
   * it works, but it's not GOOD enough.
+  * NOT Thread-safe
 
 
