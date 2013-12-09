@@ -138,7 +138,6 @@ void* ex_tpool_work(ex_tpool *tpool)
 	ex_job *job = NULL;
 	
 	while(1){
-		DBG("pid: %d", pthread_self());
 		pthread_mutex_lock(&(tpool->queue_lock));
 		while(tpool->queue_size == 0 && !tpool->shutdown){
 			pthread_cond_wait(&(tpool->queue_not_empty), &(tpool->queue_lock));
@@ -165,6 +164,7 @@ void* ex_tpool_work(ex_tpool *tpool)
 		}
 
 		pthread_mutex_unlock(&(tpool->queue_lock));
+		DBG("pid: %d", pthread_self());
 		(*(job->routine))(job->arg);
 		free(job);
 	}

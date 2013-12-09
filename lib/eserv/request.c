@@ -264,7 +264,7 @@ void requestHandler(void *s)
 	do {
 		if (ExContext.quitFlag == 1)
 			break;
-
+		
 		httpInfo.recvLen = ex_read_head(bev, recvBuf, MAX_HEADER_SIZE);
 		//httpInfo.recvLen = ex_read_head(sock, recvBuf, MAX_HEADER_SIZE);
 		if (httpInfo.recvLen <= 0)
