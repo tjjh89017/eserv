@@ -300,6 +300,6 @@ void requestHandler(void *s)
 	} while (1);
 
 	//closesocket(sock);
-	bufferevent_free(httpInfo->bufev);
+	//bufferevent_free(httpInfo.bufev);
 	--ExContext.threadCnt;
 }
