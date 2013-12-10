@@ -232,6 +232,9 @@ static int replyHandler(ExHttp *pHttp)
 
 	rType = checkpath(pHttp);
 	DBG("filetype: %d\n", rType);
+	DBG("Req Header");
+	print_header(pHttp);
+	DBG("Req Header End");
 	switch (rType) {
 	case 0: 	/* static file */
 		ret = staticProcess(pHttp);
