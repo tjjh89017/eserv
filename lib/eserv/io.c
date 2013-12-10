@@ -59,8 +59,7 @@ int ex_sock_nread(struct bufferevent *bufev, char *buf, size_t n)
 			nLeft -= ret;
 		}
 	}
-	//return nRead == n ? (int) n : -1;
-	return ret;
+	return nRead == n ? (int) n : -1;
 }
 #if 0
 int ex_sock_nread(SOCKET sock, char *buf, size_t n)
