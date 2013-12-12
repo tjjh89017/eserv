@@ -44,26 +44,30 @@ static void do_end(struct bufferevent *bufev, void *arg)
 
 }
 
-static void do_error(struct bufferevent *bufev, short event, void *arg)
+static void do_event(struct bufferevent *bufev, short event, void *arg)
 {
 	if(event & BEV_EVENT_READING)
-		DBG("Error when Reading");
-	else if(event & BEV_EVENT_WRITING)
-		DBG("Error when Writing");
-	else if(event & BEV_EVENT_TIMEOUT)
-		DBG("Error when Timeout");
-	else if(event & BEV_EVENT_ERROR)
-		DBG("Error");
+		DBG("BEV_EVENT_READING");
+	if(event & BEV_EVENT_WRITING)
+		DBG("BEV_EVENT_WRITING");
+	if(event & BEV_EVENT_TIMEOUT)
+		DBG("BEV_EVENT_TIMEOUT");
+	if(event & BEV_EVENT_ERROR)
+		DBG("BEV_EVENT_ERROR");
+	if(event & BEV_EVENT_EOF)
+		DBG("BEV_EVENT_EOF");
+	if(event & BEV_EVENT_CONNECTED)
+		DBG("BEV_EVENT_CONNECTED");
 
-	bufferevent_free(bufev);
+	//bufferevent_free(bufev);
 }
 
 static void do_accept(struct evconnlistener* listener, evutil_socket_t fd, struct sockaddr* sa, int event_code, void* arg)
 {
 	struct event_base *base = evconnlistener_get_base(listener);
 	DBG("start create bufferevent");
-	struct bufferevent *bufev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
-    bufferevent_setcb(bufev, do_request, do_end, do_error, arg);
+	struct bufferevent *bufev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+    bufferevent_setcb(bufev, do_request, do_end, do_event, arg);
     bufferevent_enable(bufev, EV_READ | EV_WRITE);
 }
 
