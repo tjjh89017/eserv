@@ -66,6 +66,7 @@ static void do_accept(struct evconnlistener* listener, evutil_socket_t fd, struc
 {
 	struct event_base *base = evconnlistener_get_base(listener);
 	DBG("start create bufferevent");
+	evutil_make_socket_nonblocking(fd);
 	struct bufferevent *bufev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
     bufferevent_setcb(bufev, do_request, do_end, do_event, arg);
     bufferevent_enable(bufev, EV_READ | EV_WRITE);
