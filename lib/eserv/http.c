@@ -54,10 +54,10 @@ static void do_event(struct bufferevent *bufev, short event, void *arg)
 		DBG("BEV_EVENT_TIMEOUT");
 	if(event & BEV_EVENT_ERROR)
 		DBG("BEV_EVENT_ERROR");
-	if(event & BEV_EVENT_EOF)
-		DBG("BEV_EVENT_EOF");
 	if(event & BEV_EVENT_CONNECTED)
 		DBG("BEV_EVENT_CONNECTED");
+	if(event & BEV_EVENT_EOF)
+		DBG("BEV_EVENT_EOF");
 
 	//bufferevent_free(bufev);
 }
