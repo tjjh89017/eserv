@@ -32,6 +32,11 @@ static int lengthSet(char *buf, int len)
 	return sprintf(buf, "Content-Length: %d\n", len);
 }
 
+static int connectionSet(char *buf)
+{
+	return sprintf(buf, "Connection: keep-alive\n");
+}
+
 static int sendHead(const ExHttp *pHttp, char *pBuf, size_t len)
 {
 	size_t nLen;
@@ -82,6 +87,7 @@ int ex_error_reply(const ExHttp *pHttp , int stscode)
 	char *pBuf = buf;
 
 	pBuf += codeSet(pBuf, stscode);
+	pBuf += connectionSet(pBuf);
 	return sendHead(pHttp, buf, pBuf - buf);
 }
 #if 0
@@ -110,6 +116,7 @@ int ex_send_msg(ExHttp *pHttp, const char *type, const char *buf, size_t len)
 	pBuf += codeSet(pBuf, 200);
 	pBuf += typeSet(pBuf, type);
 	pBuf += lengthSet(pBuf, len);
+	pBuf += connectionSet(pBuf);
 
 	do {
 		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) < 0)
@@ -131,6 +138,7 @@ int ex_send_msg_session(ExHttp *pHttp, const char *type, const char *buf, size_t
 	pBuf += typeSet(pBuf, type);
 	pBuf += lengthSet(pBuf, len);
 	pBuf += sessionSet(pBuf, session_id);
+	pBuf += connectionSet(pBuf);
 
 	do {
 		if ((ret = sendHead(pHttp, hBuf, pBuf - hBuf)) < 0)
@@ -150,6 +158,7 @@ int ex_send_file(ExHttp *pHttp , const char *filePath)
 	pHttp->url = (char *) filePath;
 	stat(filePath, &pHttp->st);
 	pBuf += fileSet(pBuf, pHttp);
+	pBuf += connectionSet(pBuf);
 	do {
 		if ((ret = sendHead(pHttp, buf, pBuf - buf)) < 0)
 			break;
@@ -170,6 +179,7 @@ static int staticProcess(const ExHttp *pHttp)
 	pBuf += codeSet(pBuf , code);
 	if (code == 200) {
 		pBuf += fileSet(pBuf , pHttp);
+		pBuf += connectionSet(pBuf);
 	}
 	do {
 		if ((ret = sendHead(pHttp, buf , pBuf - buf)) < 0)
