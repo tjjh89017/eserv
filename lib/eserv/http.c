@@ -59,7 +59,7 @@ static void do_event(struct bufferevent *bufev, short event, void *arg)
 	if(event & BEV_EVENT_EOF)
 		DBG("BEV_EVENT_EOF");
 
-	//bufferevent_free(bufev);
+	bufferevent_free(bufev);
 }
 
 static void do_accept(struct evconnlistener* listener, evutil_socket_t fd, struct sockaddr* sa, int event_code, void* arg)
