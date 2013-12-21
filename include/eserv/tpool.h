@@ -17,8 +17,8 @@ enum{
 };
 
 typedef struct{
-	pthread_t pid;
-	size_t jobs;
+	int id;
+	int jobs;
 
 	event_base *base;
 
@@ -35,8 +35,10 @@ typedef struct{
 	int (*worker_compare)(void*, void*);
 } ex_tmanager;
 
-int ex_tmanager_new(ex_tmanager **m, int max_threads, int (*compare)(void*, void*));
+int ex_tmanager_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*));
 int ex_tmanager_add(ex_tmanager *mgr, void *s);
 int ex_tmanager_free(ex_tmanager *mgr);
+
+int ex_tworker_init(ex_tworker **w, ex_tmanager *m, int id);
 
 #endif
