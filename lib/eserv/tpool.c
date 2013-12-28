@@ -24,14 +24,14 @@ static void reheap(void *array_base, int len, int size, int (*cmp)(void*, void*)
 	for(i = 0; i < len; i++){
 		son = i;
 		parent = (son - 1) / 2;
-		s_ptr = &array[son];
-		p_ptr = &array[parent];
+		s_ptr = &array[son * size];
+		p_ptr = &array[parent * size];
 		while(parent >= 0 && (*cmp)((void*)s_ptr, (void*)p_ptr) > 0){
-			SWAP(s_ptr, s_ptr, size);
+			SWAP(s_ptr, p_ptr, size);
 			son = parent;
 			parent = (son - 1) / 2;
-			s_ptr = &array[son];
-			p_ptr = &array[parent];
+			s_ptr = &array[son * size];
+			p_ptr = &array[parent * size];
 		}
 	}
 }
