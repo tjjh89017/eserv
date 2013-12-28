@@ -50,7 +50,7 @@ int ex_tworker_init(ex_tworker **w, ex_tmanager *m, int id, ex_tworker_job_func 
 int ex_tworker_increase(ex_tworker *w);
 int ex_tworker_decrease(ex_tworker *w);
 void* ex_tworker_work(void *s);
-int ex_tworker_exit(ex_tworker *w);
+void ex_tworker_exit(evutil_socket_t fd, short event_code, void *arg);
 int ex_tworker_free(ex_tworker *w);
 
 #endif

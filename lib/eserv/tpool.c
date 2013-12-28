@@ -175,3 +175,28 @@ int ex_tworker_decrease(ex_tworker *w)
 
 	return 0;
 }
+
+void* ex_tworker_work(void *s)
+{
+	ex_tworker *wkr = (ex_tworker*)s;
+	wkr->base = event_base_new();
+	struct event *signal_event = evsignal_new(wkr->base, SIGINT, ex_tworker_exit, wkr);
+	evsignal_add(signal_event, NULL);
+	event_base_dispatch(base);
+	event_del(signal_event);
+
+	return NULL;
+}
+
+void ex_tworker_exit(evutil_socket_t fd, short event_code, void *arg)
+{
+	pthread_exit(NULL);
+}
+
+int ex_tworker_free(ex_tworker *w)
+{
+	event_base_free(w->base);
+	free(w);
+
+	return 0;
+}
