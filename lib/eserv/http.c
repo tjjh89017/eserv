@@ -33,15 +33,7 @@ extern void requestHandler(void * s);
 
 static void do_request(struct bufferevent *bufev, void *arg)
 {
-	DBG("do_request");
-	if(ex_tpool_add((ex_tpool*)arg, requestHandler, bufev)){
-		perror("request error");
-	}
-}
-
-static void do_end(struct bufferevent *bufev, void *arg)
-{
-
+	requestHandler(bufev);
 }
 
 static void do_event(struct bufferevent *bufev, short event, void *arg)
@@ -60,11 +52,15 @@ static void do_event(struct bufferevent *bufev, short event, void *arg)
 		DBG("BEV_EVENT_EOF");
 
 	bufferevent_free(bufev);
+	ex_tworker *wkr = (ex_tworker*)arg;
+	ex_tmanager_wkr_done(wkr->manager, wkr);
 }
 
 static void do_accept(struct evconnlistener* listener, evutil_socket_t fd, struct sockaddr* sa, int event_code, void* arg)
 {
-	struct event_base *base = evconnlistener_get_base(listener);
+	ex_tmanager *mgr = (ex_tmanager*)arg;
+	ex_tworker *wkr = ex_tmanager_req_wkr(mgr);
+	struct event_base *base = wkr->base;
 	DBG("start create bufferevent");
 	evutil_make_socket_nonblocking(fd);
 	struct bufferevent *bufev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
@@ -86,7 +82,8 @@ static int ex_http_start()
 	struct sockaddr_in ser_addr, cli_addr; /* connector's address information */
 	int opt, sin_size;
 	struct evconnlistener *listener;
-	ex_tpool *tpool = NULL;
+	ex_tmanager *mgr = NULL;
+	int rtn = 0;
 
 	/* Setup the default values */
 	struct timeval tv;
@@ -136,12 +133,12 @@ static int ex_http_start()
 
 	base = event_base_new();
 
-	if((tpool = ex_tpool_new(EX_MAX_THREADS, EX_MAX_QUEUE, 1)) == NULL){
+	if((rtn = ex_tmanager_init(&mgr, EX_MAX_THREADS, NULL)) != 0){
 		perror("tpool new fail");
 		exit(1);
 	}
 
-	if(!(listener = evconnlistener_new_bind(base, do_accept, tpool, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, LISTEN_BACKLOG, (struct sockaddr*)&ser_addr, sizeof(ser_addr)))){
+	if(!(listener = evconnlistener_new_bind(base, do_accept, mgr, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, LISTEN_BACKLOG, (struct sockaddr*)&ser_addr, sizeof(ser_addr)))){
 		perror("listener fail");
 		exit(1);
 	}

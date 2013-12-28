@@ -41,6 +41,7 @@ typedef struct{
 	int (*worker_compare)(void*, void*);
 }ex_tmanager;
 
+int default_compare(void *a, void *b);
 int ex_tmanager_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*));
 ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr);
 int ex_tmanager_wkr_done(ex_tworker *mgr, ex_tworker *w);
