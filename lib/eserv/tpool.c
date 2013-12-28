@@ -41,7 +41,7 @@ int default_compare(void *a, void *b)
 	return ((ex_tworker*)a)->jobs - ((ex_tworker*)b)->jobs;
 }
 
-int ex_tmanger_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*))
+int ex_tmanager_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*))
 {
 	int rtn = 0;
 	int i = 0;

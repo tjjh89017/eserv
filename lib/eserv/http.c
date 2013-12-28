@@ -138,7 +138,7 @@ static int ex_http_start()
 
 	base = event_base_new();
 
-	if((rtn = ex_tmanager_init(&mgr, EX_MAX_THREADS, NULL)) != 0){
+	if((rtn = ex_tmanager_init(&mgr, EX_MAX_THREADS, default_compare)) != 0){
 		perror("tpool new fail");
 		exit(1);
 	}
