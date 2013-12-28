@@ -91,7 +91,7 @@ int ex_tmanger_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void
 
 ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr)
 {
-	pthread_mutex_lock(mgr->heap_lock);
+	pthread_mutex_lock(&mgr->heap_lock);
 
 	ex_tworker *rtn = mgr->workers[0];
 	ex_tworker_increase(rtn);
@@ -100,17 +100,78 @@ ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr)
 	//re-heap the MGR workers
 	reheap(mgr->workers, mgr->max_threads, sizeof(ex_tworker*), mgr->worker_compare);
 	
-	pthread_mutex_unlock(mgr->heap_lock);
+	pthread_mutex_unlock(&mgr->heap_lock);
 	return rtn;
 }
 
 int ex_tmanager_wkr_done(ex_tworker *mgr, ex_tworker *w)
 {
-	pthread_mutex_lock(mgr->heap_lock);
+	pthread_mutex_lock(&mgr->heap_lock);
 
 	ex_tworker_decrease(w);
 	reheap(mgr->workers, mgr->max_threads, sizeof(ex_tworker*), mgr->worker_compare);
 
-	pthread_mutex_unlock(mgr->heap_lock);
+	pthread_mutex_unlock(&mgr->heap_lock);
+	return 0;
+}
+
+int ex_tmanager_free(ex_tmanager *mgr)
+{
+	pthread_mutex_lock(&mgr->heap_lock);
+
+	int rtn = 0;
+	int i = 0;
+	for(i = 0; i < mgr->max_threads; i++){
+		if((rtn = pthread_kill(&mgr->workers[i]->pid, SIGINT)) != 0){
+			perror("SIGINT failed to sent");
+		}
+	}
+
+	for(i = 0; i < mgr->max_threads; i++){
+		if((rtn = pthread_join(&mgr->workers[i]->pid, NULL)) != 0){
+			ex_tworker_free(mgr->workers[i]);
+		}
+	}
+	pthread_mutex_unlock(&mgr->heap_lock);
+
+	pthread_mutex_destroy(&mgr->heap_lock);
+	free(mgr);
+
+	return 0;
+}
+
+int ex_tworker_init(ex_tworker **w, ex_tmanager *m, int id, ex_tworker_job_func fun, void *arg)
+{
+	int rtn = 0;
+	ex_tworker *wkr = NULL;
+	if((wkr = (ex_tworker*)malloc(sizeof(ex_tworker))) == NULL)
+		return EX_TWKR_ALLOCFAIL;
+
+	wkr->id = id;
+	wkr->jobs = 0;
+	wkr->job_func = fun;
+	wkr->arg = arg;
+	wkr->manager = m;
+
+	if((rtn = pthread_create(&wkr->pid, NULL, ex_tworker_work, wkr)) != 0){
+		free(wkr);
+		return EX_TWKR_THREAD_FAIL;
+	}
+
+	*w = wkr;
+	return 0;
+}
+
+int ex_tworker_increase(ex_tworker *w)
+{
+	w->jobs++;
+
+	return 0;
+}
+
+int ex_tworker_decrease(ex_tworker *w)
+{
+	w->jobs--;
+
 	return 0;
 }
