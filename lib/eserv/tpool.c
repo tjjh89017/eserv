@@ -140,7 +140,7 @@ int ex_tmanager_free(ex_tmanager *mgr)
 	return 0;
 }
 
-int ex_tworker_init(ex_tworker **w, ex_tmanager *m, int id, ex_tworker_job_func fun, void *arg)
+int ex_tworker_init(ex_tworker **w, ex_tmanager *m)
 {
 	int rtn = 0;
 	ex_tworker *wkr = NULL;
@@ -149,8 +149,6 @@ int ex_tworker_init(ex_tworker **w, ex_tmanager *m, int id, ex_tworker_job_func 
 
 	wkr->id = id;
 	wkr->jobs = 0;
-	wkr->job_func = fun;
-	wkr->arg = arg;
 	wkr->manager = m;
 
 	if((rtn = pthread_create(&wkr->pid, NULL, ex_tworker_work, wkr)) != 0){

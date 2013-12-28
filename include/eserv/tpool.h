@@ -18,18 +18,19 @@ enum{
 	EX_TWKR_THREAD_FAIL,
 };
 
-typedef struct{
+typedef struct _ex_tworker ex_tworker;
+typedef struct _ex_tmanager ex_tmanager;
+
+typedef struct _ex_tworker{
 	int id;
 	int jobs;
 	pthread_t pid;
 
-	event_base *base;
-	ex_tworker_job_func job_func;
-	void *arg;
+	struct event_base *base;
 	ex_tmanager *manager;
 }ex_tworker;
 
-typedef struct{
+typedef struct _ex_tmanager{
 	int max_threads;
 	int shutdown;
 
@@ -38,8 +39,6 @@ typedef struct{
 	ex_tworker **workers;
 	int (*worker_compare)(void*, void*);
 }ex_tmanager;
-
-typedef int (*ex_tworker_job_func)(ex_tworker*, void*);
 
 int default_compare(void *a, void *b);
 int ex_tmanager_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*));
