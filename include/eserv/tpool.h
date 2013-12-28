@@ -22,7 +22,6 @@ typedef struct _ex_tworker ex_tworker;
 typedef struct _ex_tmanager ex_tmanager;
 
 typedef struct _ex_tworker{
-	int id;
 	int jobs;
 	pthread_t pid;
 
@@ -46,7 +45,7 @@ ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr);
 int ex_tmanager_wkr_done(ex_tworker *mgr, ex_tworker *w);
 int ex_tmanager_free(ex_tmanager *mgr);
 
-int ex_tworker_init(ex_tworker **w, ex_tmanager *m, int id, ex_tworker_job_func fun, void *arg);
+int ex_tworker_init(ex_tworker **w, ex_tmanager *m);
 int ex_tworker_increase(ex_tworker *w);
 int ex_tworker_decrease(ex_tworker *w);
 void* ex_tworker_work(void *s);

@@ -147,7 +147,6 @@ int ex_tworker_init(ex_tworker **w, ex_tmanager *m)
 	if((wkr = (ex_tworker*)malloc(sizeof(ex_tworker))) == NULL)
 		return EX_TWKR_ALLOCFAIL;
 
-	wkr->id = id;
 	wkr->jobs = 0;
 	wkr->manager = m;
 
