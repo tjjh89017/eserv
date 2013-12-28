@@ -43,7 +43,7 @@ typedef struct _ex_tmanager{
 int default_compare(void *a, void *b);
 int ex_tmanager_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*));
 ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr);
-int ex_tmanager_wkr_done(ex_tworker *mgr, ex_tworker *w);
+int ex_tmanager_wkr_done(ex_tmanager *mgr, ex_tworker *w);
 int ex_tmanager_free(ex_tmanager *mgr);
 
 int ex_tworker_init(ex_tworker **w, ex_tmanager *m);

@@ -38,7 +38,7 @@ static void reheap(void *array_base, int len, int size, int (*cmp)(void*, void*)
 
 int default_compare(void *a, void *b)
 {
-	return ((ex_tworker*)a->jobs - (ex_tworker*)b->jobs);
+	return ((ex_tworker*)a)->jobs - ((ex_tworker*)b)->jobs;
 }
 
 int ex_tmanger_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*))
@@ -55,7 +55,7 @@ int ex_tmanger_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void
 	if(compare == NULL)
 		mgr->worker_compare = default_compare;
 
-	if((rtn = pthread_mutex_init(&mgr->heap_lock)) != 0){
+	if((rtn = pthread_mutex_init(&mgr->heap_lock, NULL)) != 0){
 		rtn = EX_TMGR_LOCKFAIL;
 		goto TMGR_INIT_FAIL;
 	}
@@ -104,7 +104,7 @@ ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr)
 	return rtn;
 }
 
-int ex_tmanager_wkr_done(ex_tworker *mgr, ex_tworker *w)
+int ex_tmanager_wkr_done(ex_tmanager *mgr, ex_tworker *w)
 {
 	pthread_mutex_lock(&mgr->heap_lock);
 
@@ -179,7 +179,7 @@ void* ex_tworker_work(void *s)
 	wkr->base = event_base_new();
 	struct event *signal_event = evsignal_new(wkr->base, SIGINT, ex_tworker_exit, wkr);
 	evsignal_add(signal_event, NULL);
-	event_base_dispatch(base);
+	event_base_dispatch(wkr->base);
 	event_del(signal_event);
 
 	return NULL;
