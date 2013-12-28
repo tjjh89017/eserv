@@ -36,6 +36,11 @@ static void do_request(struct bufferevent *bufev, void *arg)
 	requestHandler(bufev);
 }
 
+static void do_end(struct bufferevent *bufev, void *arg)
+{
+
+}
+
 static void do_event(struct bufferevent *bufev, short event, void *arg)
 {
 	if(event & BEV_EVENT_READING)
