@@ -106,7 +106,9 @@ ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr)
 
 int ex_tmanager_wkr_done(ex_tmanager *mgr, ex_tworker *w)
 {
+DBG("before heap lock");
 	pthread_mutex_lock(&mgr->heap_lock);
+DBG("after heap lock");
 
 	ex_tworker_decrease(w);
 	reheap(mgr->workers, mgr->max_threads, sizeof(ex_tworker*), mgr->worker_compare);
