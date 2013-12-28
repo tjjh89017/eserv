@@ -31,14 +31,17 @@ typedef struct{
 
 	pthread_mutex_t heap_lock;
 	int workers_num;
-	ex_tworker** workers;
+	ex_tworker **workers;
 	int (*worker_compare)(void*, void*);
-} ex_tmanager;
+}ex_tmanager;
 
 int ex_tmanager_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void*));
-int ex_tmanager_add(ex_tmanager *mgr, void *s);
+ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr);
+int ex_tmanager_wkr_done(ex_tworker *mgr, int id);
 int ex_tmanager_free(ex_tmanager *mgr);
 
 int ex_tworker_init(ex_tworker **w, ex_tmanager *m, int id);
+int ex_tworker_increase(ex_tworker *w);
+int ex_tworker_decrease(ex_tworker *w);
 
 #endif
