@@ -1,5 +1,41 @@
 #include "tpool.h"
 
+#define SWAP(a, b, size) \
+{ \
+	int _size = (size); \
+	char *_a = (a), *_b = (b); \
+	char _tmp; \
+	while(_size--){ \
+		_tmp = *_a; \
+		*_a++ = *_b; \
+		*_b++ = _tmp; \
+	} \
+}
+
+static void reheap(void *array_base, int len, int size, int (*cmp)(void*, void*))
+{
+	char *array = array_base;
+	int i = 0;
+	int son = 0;
+	int parent = 0;
+	char *s_ptr = &array[son];
+	char *p_ptr = &array[parent];
+
+	for(i = 0; i < len; i++){
+		son = i;
+		parent = (son - 1) / 2;
+		s_ptr = &array[son];
+		p_ptr = &array[parent];
+		while(parent >= 0 && (*cmp)((void*)s_ptr, (void*)p_ptr) > 0){
+			SWAP(s_ptr, s_ptr, size);
+			son = parent;
+			parent = (son - 1) / 2;
+			s_ptr = &array[son];
+			p_ptr = &array[parent];
+		}
+	}
+}
+
 int default_compare(void *a, void *b)
 {
 	return ((ex_tworker*)a->jobs - (ex_tworker*)b->jobs);
@@ -51,4 +87,30 @@ int ex_tmanger_init(ex_tmanager **m, int max_threads, int (*compare)(void*, void
 				free(mgr);
 		}
 		return rtn;
+}
+
+ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr)
+{
+	pthread_mutex_lock(mgr->heap_lock);
+
+	ex_tworker *rtn = mgr->workers[0];
+	ex_tworker_increase(rtn);
+
+	// TODO spilt heap to another function
+	//re-heap the MGR workers
+	reheap(mgr->workers, mgr->max_threads, sizeof(ex_tworker*), mgr->worker_compare);
+	
+	pthread_mutex_unlock(mgr->heap_lock);
+	return rtn;
+}
+
+int ex_tmanager_wkr_done(ex_tworker *mgr, ex_tworker *w)
+{
+	pthread_mutex_lock(mgr->heap_lock);
+
+	ex_tworker_decrease(w);
+	reheap(mgr->workers, mgr->max_threads, sizeof(ex_tworker*), mgr->worker_compare);
+
+	pthread_mutex_unlock(mgr->heap_lock);
+	return 0;
 }
