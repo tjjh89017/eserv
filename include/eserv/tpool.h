@@ -27,6 +27,7 @@ typedef struct _ex_tworker{
 	pthread_t pid;
 
 	struct event_base *base;
+	struct event *persist_event;
 	ex_tmanager *manager;
 }ex_tworker;
 

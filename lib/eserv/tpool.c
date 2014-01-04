@@ -124,12 +124,7 @@ int ex_tmanager_free(ex_tmanager *mgr)
 	int rtn = 0;
 	int i = 0;
 	for(i = 0; i < mgr->max_threads; i++){
-		if((rtn = pthread_kill(&mgr->workers[i]->pid, SIGINT)) != 0){
-			perror("SIGINT failed to sent");
-		}
-	}
-
-	for(i = 0; i < mgr->max_threads; i++){
+		event_del(mgr->workers[i]->persist_event);
 		if((rtn = pthread_join(&mgr->workers[i]->pid, NULL)) != 0){
 			ex_tworker_free(mgr->workers[i]);
 		}
@@ -175,14 +170,22 @@ int ex_tworker_decrease(ex_tworker *w)
 	return 0;
 }
 
+static void persist_cb(int sock, short which, void *arg)
+{
+	struct event *ev = *(struct event**)arg;
+	event_active(ev, EV_WRITE, 0);
+}
+
 void* ex_tworker_work(void *s)
 {
 	ex_tworker *wkr = (ex_tworker*)s;
-	wkr->base = event_base_new();
-	struct event *signal_event = evsignal_new(wkr->base, SIGINT, ex_tworker_exit, wkr);
-	evsignal_add(signal_event, NULL);
+	struct event_config *cfg = event_config_new();
+	event_config_set_max_dispatch_interval(cfg, NULL, 16, 0);
+	wkr->base = event_base_new_with_config(cfg);
+
+	wkr->persist_event = event_new(wkr->base, -1, EV_PERSIST | EV_READ, persist_cb, &wkr->persist_event);
+	event_add(wkr->persist_event, NULL);
 	event_base_dispatch(wkr->base);
-	event_del(signal_event);
 
 	return NULL;
 }
