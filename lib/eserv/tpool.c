@@ -106,9 +106,7 @@ ex_tworker* ex_tmanager_req_wkr(ex_tmanager *mgr)
 
 int ex_tmanager_wkr_done(ex_tmanager *mgr, ex_tworker *w)
 {
-DBG("before heap lock");
 	pthread_mutex_lock(&mgr->heap_lock);
-DBG("after heap lock");
 
 	ex_tworker_decrease(w);
 	reheap(mgr->workers, mgr->max_threads, sizeof(ex_tworker*), mgr->worker_compare);
@@ -180,7 +178,8 @@ void* ex_tworker_work(void *s)
 {
 	ex_tworker *wkr = (ex_tworker*)s;
 	struct event_config *cfg = event_config_new();
-	event_config_set_max_dispatch_interval(cfg, NULL, 16, 0);
+	// TODO something strange there
+	//event_config_set_max_dispatch_interval(cfg, NULL, 16, 0);
 	wkr->base = event_base_new_with_config(cfg);
 
 	wkr->persist_event = event_new(wkr->base, -1, EV_PERSIST | EV_READ, persist_cb, &wkr->persist_event);

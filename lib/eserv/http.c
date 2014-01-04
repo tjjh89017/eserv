@@ -56,9 +56,9 @@ static void do_event(struct bufferevent *bufev, short event, void *arg)
 	if(event & BEV_EVENT_EOF)
 		DBG("BEV_EVENT_EOF");
 
-	bufferevent_free(bufev);
 	ex_tworker *wkr = (ex_tworker*)arg;
 	ex_tmanager_wkr_done(wkr->manager, wkr);
+	bufferevent_free(bufev);
 }
 
 static void do_accept(struct evconnlistener* listener, evutil_socket_t fd, struct sockaddr* sa, int event_code, void* arg)
@@ -69,7 +69,7 @@ static void do_accept(struct evconnlistener* listener, evutil_socket_t fd, struc
 	DBG("start create bufferevent");
 	evutil_make_socket_nonblocking(fd);
 	struct bufferevent *bufev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
-    bufferevent_setcb(bufev, do_request, do_end, do_event, arg);
+    bufferevent_setcb(bufev, do_request, do_end, do_event, wkr);
     bufferevent_enable(bufev, EV_READ | EV_WRITE);
 }
 
