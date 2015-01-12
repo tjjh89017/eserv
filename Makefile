@@ -12,7 +12,9 @@ CFLAGS = -Os -Wextra \
 	 -Iinclude
 # -D NDEBUG
 
-CFLAGS += -m32
+# CFLAGS += -m32
+CFLAGS += -m64
+CFLAGS += -D NDEBUG
 LIBS = -Llib/eserv
 LDFLAGS = -leserv -lpthread -lcrypt
 
@@ -25,7 +27,9 @@ OBJS = main.o \
 all: $(PROG)
 
 $(PROG): $(OBJS)
+	@cd lib/eserv;make all;
 	$(CC) -o $(PROG) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
 
 clean:
+	@cd lib/eserv;make clean;
 	rm -f $(PROG) $(OBJS)
