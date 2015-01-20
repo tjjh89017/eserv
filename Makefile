@@ -18,8 +18,7 @@ CFLAGS += -D NDEBUG
 LIBS = -Llib/eserv
 LDFLAGS = -leserv -lpthread -lcrypt
 
-OBJS = main.o \
-	cgi_custom.o
+OBJS = main.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c

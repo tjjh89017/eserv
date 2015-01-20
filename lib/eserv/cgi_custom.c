@@ -1,5 +1,5 @@
-#include "eserv/cgi.h"
-#include "eserv/session.h"
+#include "cgi.h"
+#include "session.h"
 
 int cgi_page_sum(ExHttp *pHttp)
 {
