@@ -1,19 +1,14 @@
 #include "cgi.h"
-
-// after ex_init() register the cgi
-/* FIXME : flexible inclusion of customized CGI */
-//#include "../cgi_custom.h"
+#include "cgi_custom.h"
 
 extern cgi_page cgi_pages[];
 
 void cgi_init()
 {
-/*
 	size_t i;
 	for (i = 0; i < sizeof(cgi_pages) / sizeof(cgi_page); i++)
 		cgi_page_add(cgi_pages[i].name,
 		             cgi_pages[i].callback);
-*/
 }
 
 void cgi_uninit()
