@@ -10,10 +10,7 @@ CFLAGS = -Os -Wextra \
 	 $(SOURCE_FLAGS) -g \
 	 -std=gnu99 \
 	 -Iinclude
-# -D NDEBUG
 
-# CFLAGS += -m32
-CFLAGS += -m64
 CFLAGS += -D NDEBUG
 LIBS = -Llib/eserv
 LDFLAGS = -leserv -lpthread -lcrypt

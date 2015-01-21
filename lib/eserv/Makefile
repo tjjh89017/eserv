@@ -11,9 +11,6 @@ CFLAGS = -Os -Wall -Wextra \
 	-std=gnu99 \
 	-I../../include/eserv
 
-# CFLAGS += -m32
-CFLAGS += -m64
-
 LDFLAGS = -lpthread -lcrypt
 
 OBJS = \
