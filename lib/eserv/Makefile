@@ -11,8 +11,6 @@ CFLAGS = -Os -Wall -Wextra \
 	-std=gnu99 \
 	-I../../include/eserv
 
-CFLAGS += -m32
-
 LDFLAGS = -lpthread -lcrypt
 
 OBJS = \
@@ -25,7 +23,8 @@ OBJS = \
 	entry.o \
 	cgi.o \
 	misc.o \
-	session.o
+	session.o \
+	cgi_custom.o
 
 .c.o:
 	$(CC) $(CFLAGS)  -c $*.c

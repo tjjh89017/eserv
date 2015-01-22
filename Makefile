@@ -10,14 +10,12 @@ CFLAGS = -Os -Wextra \
 	 $(SOURCE_FLAGS) -g \
 	 -std=gnu99 \
 	 -Iinclude
-# -D NDEBUG
 
-CFLAGS += -m32
+CFLAGS += -D NDEBUG
 LIBS = -Llib/eserv
 LDFLAGS = -leserv -lpthread -lcrypt
 
-OBJS = main.o \
-	cgi_custom.o
+OBJS = main.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c
@@ -25,7 +23,9 @@ OBJS = main.o \
 all: $(PROG)
 
 $(PROG): $(OBJS)
+	@cd lib/eserv;make all;
 	$(CC) -o $(PROG) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
 
 clean:
+	@cd lib/eserv;make clean;
 	rm -f $(PROG) $(OBJS)
